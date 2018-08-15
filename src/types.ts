@@ -148,7 +148,7 @@ interface VisOpts {
   yType: 'quantitative'|'ordinal'|'nominal';
 }
 
-export type Drawable = HTMLElement|SurfaceInstance|{
+export type Drawable = HTMLElement|Surface|{
   drawArea: HTMLElement;
   [others: string]: {}|null|undefined;
 };
