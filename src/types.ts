@@ -1,4 +1,4 @@
-/**
+/*
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,18 +18,58 @@
 // Types shared across the project and that users will commonly interact with
 
 /**
- * The public visor api
+ * Visor public API
  */
 export interface Visor {
+  /**
+   * The containing HTMLElement
+   */
   el: HTMLElement;
+
+  /**
+   * Returns a surface, creating one if necessary
+   */
   surface: (options: SurfaceInfo) => Surface;
+
+  /**
+   * Returns true if the visor is in fullscreen mode. Note that the visor
+   * may be in a closed state even if it is in fullscreen mode
+   */
   isFullscreen: () => boolean;
+
+  /**
+   * Returns true if the visor is currently open/visible false otherwise
+   */
   isOpen: () => boolean;
+
+  /**
+   * Opens the visor
+   */
   open: () => void;
+
+  /**
+   * Closes the visor
+   */
   close: () => void;
+
+  /**
+   * toggles the visor open and closed
+   */
   toggle: () => void;
+
+  /**
+   * toggles the fullscreen mode of the visor
+   */
   toggleFullScreen: () => void;
+
+  /**
+   * Unbinds the default keyboard shortcuts
+   */
   unbindKeys: () => void;
+
+  /**
+   * Binds the default keyboard shortcuts
+   */
   bindKeys: () => void;
 }
 
@@ -37,8 +77,19 @@ export interface Visor {
  * The public api of a 'surface'
  */
 export interface Surface {
+  /**
+   * The containing HTML element for this surface
+   */
   container: HTMLElement;
+
+  /**
+   * A textual label for the surface.
+   */
   label: HTMLElement;
+
+  /**
+   * A container for plots and other renderings
+   */
   drawArea: HTMLElement;
 }
 
@@ -48,8 +99,19 @@ export interface Surface {
  * name and tab are also used for retrieval of a surface instance.
  */
 export interface SurfaceInfo {
+  /**
+   * The name / label of this surface
+   */
   name: string;
+
+  /**
+   * The name of the tab this surface should appear on
+   */
   tab?: string;
+
+  /**
+   * Display Styles for the surface
+   */
   styles?: StyleOptions;
 }
 
