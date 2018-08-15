@@ -16,10 +16,10 @@
  */
 
 import {renderBarchart} from './render/barchart';
-import {visor} from './visor';
 
 const render = {
   barchart: renderBarchart
 };
 
-export {visor, render};
+export {visor} from './visor';
+export {render};

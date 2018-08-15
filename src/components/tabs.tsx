@@ -17,7 +17,6 @@
 
 import { h, Component } from 'preact';
 import { css } from 'glamor';
-// @ts-ignore
 import { tachyons as tac } from 'glamor-tachyons';
 
 interface TabsProps {

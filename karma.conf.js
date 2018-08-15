@@ -32,22 +32,19 @@ if (coverageEnabled) {
 
 module.exports = function(config) {
   const args = [];
-  if (config.backend) {
-    args.push('--backend', config.backend);
-  }
+
   if (config.grep) {
     args.push('--grep', config.grep);
-  }
-  if (config.features) {
-    args.push('--features', config.features);
   }
 
   config.set({
     frameworks: ['jasmine', 'karma-typescript'],
     files: [{pattern: 'src/**/*.ts*'}],
+    exclude: ['src/@types/**'],
     preprocessors: {
       '**/*.ts': ['karma-typescript'],
       '**/*.tsx': ['karma-typescript'],
+      '**/*.d.ts': ['karma-typescript'],
     },
     karmaTypescriptConfig,
     reporters: ['progress', 'karma-typescript'],
@@ -88,10 +85,6 @@ module.exports = function(config) {
         os_version: '11.0',
         real_mobile: true
       },
-      chrome_with_swift_shader: {
-        base: 'Chrome',
-        flags: ['--blacklist-accelerated-compositing', '--blacklist-webgl']
-      }
     },
     client: {
       jasmine: {random: false},

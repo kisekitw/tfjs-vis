@@ -1,7 +1,7 @@
 {
   "name": "tfjs-vis",
   "version": "0.0.1",
-  "repository": "",
+  "repository": "https://github.com/tensorflow/tfjs-vis",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {

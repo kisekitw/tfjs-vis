@@ -56,7 +56,6 @@ describe('Visor Singleton', () => {
 
   it('requires a surface name', () => {
     const visorInstance = visor();
-    // console.log('REQ')
     expect(() => {
       // @ts-ignore
       visorInstance.surface();

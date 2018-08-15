@@ -17,21 +17,21 @@
 
 import { h, Component } from 'preact';
 import { css } from 'glamor';
-// @ts-ignore
 import { tachyons as tac } from 'glamor-tachyons';
 import { SurfaceInfoStrict, CSSOptions } from '../types';
 
 // Internal Props
 interface SurfaceProps extends SurfaceInfoStrict {
   visible: boolean;
-  registerSurface: (name: string, tab: string, surface: Surface) => void;
+  registerSurface: (name: string, tab: string, surface: SurfaceComponent)
+    => void;
 }
 
 /**
  * A surface is container for visualizations and other rendered thigns.
  * It consists of a containing DOM Element, a label and an empty drawArea.
  */
-export class Surface extends Component<SurfaceProps> {
+export class SurfaceComponent extends Component<SurfaceProps> {
 
   static defaultStyles: Partial<CSSOptions> = {
     maxWidth: '580px',
@@ -59,7 +59,7 @@ export class Surface extends Component<SurfaceProps> {
 
     const { name, visible, styles } = this.props;
     const finalStyles = {
-      ...Surface.defaultStyles,
+      ...SurfaceComponent.defaultStyles,
       ...styles,
     };
 
