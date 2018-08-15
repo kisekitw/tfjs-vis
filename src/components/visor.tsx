@@ -17,26 +17,12 @@
 
 import { h, Component, render } from 'preact';
 import { css } from 'glamor';
-// @ts-ignore
 import { tachyons as tac } from 'glamor-tachyons';
 
-import { Surface } from './surface';
+import { SurfaceComponent } from './surface';
 import { Tabs } from './tabs';
 
 import { SurfaceInfoStrict } from '../types';
-
-/**
- * The Visor is a component that displays and manages 'Tabs' and 'Surfaces'.
- *
- * It is meant to exist as a singleton component on a given page and is thus
- * accessed by a visor() function that exposes a single instance of this
- * component via an imperative API (i.e. its implementation as a (p)react
- * component is an internal implementation detail.
- *
- * Following that, and somewhat unlike a typical react component, it does allow
- * for imperative calls to that instance to modify internal state. Any state
- * that needs to be serialized or persisted should be lifted to props.
- */
 
 interface VisorProps {
   // An ordered list of surfaces to render. These are specified by SurfaceInfo
@@ -56,6 +42,18 @@ interface VisorState {
   tabs: Set<string>;
 }
 
+/**
+ * The Visor is a component that displays and manages 'Tabs' and 'Surfaces'.
+ *
+ * It is meant to exist as a singleton component on a given page and is thus
+ * accessed by a visor() function that exposes a single instance of this
+ * component via an imperative API (i.e. its implementation as a (p)react
+ * component is an internal implementation detail.
+ *
+ * Following that, and somewhat unlike a typical react component, it does allow
+ * for imperative calls to that instance to modify internal state. Any state
+ * that needs to be serialized or persisted should be lifted to props.
+ */
 export class VisorComponent extends Component<VisorProps, VisorState> {
 
   /**
@@ -84,12 +82,12 @@ export class VisorComponent extends Component<VisorProps, VisorState> {
   }
 
   // Lookup dictionary for Surfaces
-  private surfaces: Map<string, Surface>;
+  private surfaces: Map<string, SurfaceComponent>;
 
   constructor(props: VisorProps) {
     super(props);
-    this.surfaces = new Map<string, Surface>();
-    const startOpen = props.startOpen === undefined ? true : props.startOpen;
+    this.surfaces = new Map<string, SurfaceComponent>();
+    const startOpen = props.startOpen == null ? true : props.startOpen;
 
     this.state = {
       isOpen: startOpen,
@@ -127,10 +125,10 @@ export class VisorComponent extends Component<VisorProps, VisorState> {
 
   getSurface(label: string, tab: string) {
     const surfaceId = this.surfaceId(label, tab);
-    let surface: Surface;
+    let surface: SurfaceComponent;
 
     if (this.surfaces.has(surfaceId)) {
-      surface = this.surfaces.get(surfaceId) as Surface;
+      surface = this.surfaces.get(surfaceId) as SurfaceComponent;
     } else {
       throw Error(`Surface not found with id: ${surfaceId}`);
     }
@@ -162,7 +160,7 @@ export class VisorComponent extends Component<VisorProps, VisorState> {
       }
     }
 
-    if (newActiveTab !== undefined) {
+    if (newActiveTab != null) {
       this.setState({
         tabs,
         activeTab: newActiveTab,
@@ -176,14 +174,16 @@ export class VisorComponent extends Component<VisorProps, VisorState> {
 
   // Event Handlers
 
-  private registerSurface(name: string, tab: string, surface: Surface) {
+  private registerSurface(name: string, tab: string,
+    surface: SurfaceComponent) {
     const surfaceId = this.surfaceId(name, tab);
     this.surfaces.set(surfaceId, surface);
   }
 
   private keyHandler(event: KeyboardEvent) {
-    // "`" (backtick) key
-    if (event.keyCode === 192) {
+    const BACKTICK_KEY = 192;
+
+    if (event.keyCode === BACKTICK_KEY) {
       if (event.shiftKey) {
         this.toggleFullScreen();
       } else {
@@ -215,7 +215,10 @@ export class VisorComponent extends Component<VisorProps, VisorState> {
     const { surfaceList } = this.props;
     const tabNames = Array.from(this.getTabs().values());
 
-    const width = isFullscreen ? '90vw' : '500px';
+    const SMALL_WIDTH = '500px';
+    const LARGE_WIDTH = '90vw';
+
+    const width = isFullscreen ? LARGE_WIDTH : SMALL_WIDTH;
 
     const defaultStyles = css({
       width,
@@ -266,7 +269,7 @@ export class VisorComponent extends Component<VisorProps, VisorState> {
         <div className={`${surfacesContainerStyle} visor-surfaces`} >
           {
             surfaceList.map((surfaceInfo) => (
-              <Surface
+              <SurfaceComponent
                 key={surfaceInfo.name + surfaceInfo.tab}
                 name={surfaceInfo.name}
                 tab={surfaceInfo.tab}

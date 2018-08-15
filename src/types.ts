@@ -20,9 +20,9 @@
 /**
  * The public visor api
  */
-export interface VisorInstance {
+export interface Visor {
   el: HTMLElement;
-  surface: (options: SurfaceInfo) => SurfaceInstance;
+  surface: (options: SurfaceInfo) => Surface;
   isFullscreen: () => boolean;
   isOpen: () => boolean;
   open: () => void;
@@ -36,7 +36,7 @@ export interface VisorInstance {
 /**
  * The public api of a 'surface'
  */
-export interface SurfaceInstance {
+export interface Surface {
   container: HTMLElement;
   label: HTMLElement;
   drawArea: HTMLElement;

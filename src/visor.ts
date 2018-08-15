@@ -16,7 +16,11 @@
  */
 
 import {VisorComponent} from './components/visor';
-import {SurfaceInfo, SurfaceInfoStrict, VisorInstance} from './types';
+import {SurfaceInfo, SurfaceInfoStrict, Visor} from './types';
+
+let visorSingleton: Visor;
+const DEFAULT_TAB = 'Visor';
+const VISOR_CONTAINER_ID = 'tfjs-visor-container';
 
 /**
  * The primary interface to the visor is the visor() function.
@@ -25,20 +29,22 @@ import {SurfaceInfo, SurfaceInfoStrict, VisorInstance} from './types';
  * singleton object will be replaced if the visor is removed from the DOM for
  * some reason.
  */
-let visorSingleton: VisorInstance;
-const DEFAULT_TAB = 'Visor';
-export function visor(): VisorInstance {
-  if (document.querySelector('#tfjs-visor-container') &&
-      visorSingleton !== undefined) {
+export function visor(): Visor {
+  if (document == null) {
+    throw new Error(
+        'No document defined. This library needs a browser/dom to work');
+  }
+
+  if (document.getElementById(VISOR_CONTAINER_ID) && visorSingleton != null) {
     return visorSingleton;
   }
 
   // Create the container
-  let visorEl = document.querySelector('#tfjs-visor-container') as HTMLElement;
+  let visorEl = document.getElementById(VISOR_CONTAINER_ID);
 
-  if (visorEl === null || visorEl === undefined) {
+  if (visorEl == null) {
     visorEl = document.createElement('div');
-    visorEl.id = 'tfjs-visor-container';
+    visorEl.id = VISOR_CONTAINER_ID;
     document.body.appendChild(visorEl);
   }
 
@@ -65,9 +71,10 @@ export function visor(): VisorInstance {
   visorSingleton = {
     el: visorEl,
     surface: (options: SurfaceInfo) => {
-      const {name, tab} = options;
+      const {name} = options;
+      const tab = options.tab == null ? DEFAULT_TAB : options.tab;
 
-      if (name === undefined || name === null ||
+      if (name == null ||
           // tslint:disable-next-line
           !(typeof name === 'string' || name as any instanceof String)) {
         throw new Error(
@@ -75,28 +82,18 @@ export function visor(): VisorInstance {
             'You must pass a config object with a \'name\' property to create or retrieve a surface');
       }
 
-      let _tab: string;
-      let finalOptions: SurfaceInfoStrict;
+      const finalOptions: SurfaceInfoStrict = {
+        ...options,
+        tab,
+      };
 
-      // Set the default tab if none is provided.
-      if (tab === null || tab === undefined) {
-        _tab = DEFAULT_TAB;
-        finalOptions = {
-          ...options,
-          tab: _tab,
-        };
-      } else {
-        _tab = tab;
-        finalOptions = options as SurfaceInfoStrict;
-      }
-
-      const key = `${name}-${_tab}`;
+      const key = `${name}-${tab}`;
       if (!surfaceList.has(key)) {
         surfaceList.set(key, finalOptions);
       }
 
-      renderVisor(visorEl, surfaceList);
-      return visorComponentInstance.getSurface(name, _tab);
+      renderVisor(visorEl as HTMLElement, surfaceList);
+      return visorComponentInstance.getSurface(name, tab);
     },
     isFullscreen: () => visorComponentInstance.isFullscreen(),
     isOpen: () => visorComponentInstance.isOpen(),

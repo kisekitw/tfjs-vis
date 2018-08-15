@@ -15,6 +15,4 @@
  * =============================================================================
  */
 
-import {visor} from './visor';
-
-export {visor};
+export {visor} from './visor';
