@@ -30,7 +30,7 @@ const VISOR_CONTAINER_ID = 'tfjs-visor-container';
  * some reason.
  */
 export function visor(): Visor {
-  if (document == null) {
+  if (typeof document === 'undefined') {
     throw new Error(
         'No document defined. This library needs a browser/dom to work');
   }
