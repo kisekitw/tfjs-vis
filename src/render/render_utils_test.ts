@@ -15,7 +15,12 @@
  * =============================================================================
  */
 
-import {shallowEquals} from './render_utils';
+import {visor} from '../index';
+import {getDrawArea, shallowEquals} from './render_utils';
+
+beforeEach(() => {
+  document.body.innerHTML = '<div id="container"></div>';
+});
 
 describe('shallowEqual', () => {
   it('returns true for similar objects', async () => {
@@ -50,7 +55,7 @@ describe('shallowEqual', () => {
     expect(shallowEquals(a, b)).toBe(false);
   });
 
-  it('returns false for similar objects (array ref)', async () => {
+  it('returns true for similar objects (array ref)', async () => {
     // tslint:disable-next-line:no-any
     const ref: any[] = [];
 
@@ -67,5 +72,23 @@ describe('shallowEqual', () => {
     };
 
     expect(shallowEquals(a, b)).toBe(true);
+  });
+});
+
+describe('getDrawArea', () => {
+  it('works with HTMLElement', async () => {
+    const el = document.getElementById('container') as HTMLElement;
+    expect(getDrawArea(el)).toEqual(el);
+  });
+
+  it('works with a surface', async () => {
+    const surface = visor().surface({name: 'test'});
+    expect(getDrawArea(surface)).toEqual(surface.drawArea);
+  });
+
+  it('fails with other stuff', async () => {
+    const surface = visor().surface({name: 'test'});
+    //@ts-ignore
+    expect(() => getDrawArea('not-a-surface')).toThrow();
   });
 });

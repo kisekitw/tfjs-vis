@@ -16,15 +16,8 @@
  */
 
 import embed, {Mode, Result as EmbedRes, VisualizationSpec} from 'vega-embed';
-
 import {Drawable, VisOptions} from '../types';
-
 import {getDrawArea, shallowEquals} from './render_utils';
-
-interface Datum {
-  index: number;
-  value: number;
-}
 
 const defaultOpts = {
   xLabel: '',
@@ -34,7 +27,7 @@ const defaultOpts = {
 };
 
 interface InstanceInfo {
-  // Note the type of view is not exported by vega-embed. We could import it
+  // Note the type of 'view' is not exported by vega-embed. We could import it
   // from vega but that would add a direct dependency to vega.
 
   // tslint:disable-next-line:no-any
@@ -42,14 +35,25 @@ interface InstanceInfo {
   lastOptions: VisOptions;
 }
 
+interface Datum {
+  index: number;
+  value: number;
+}
+
+// We keep a map of containers to chart instances in order to reuse the instance
+// where possible.
 const instances: Map<HTMLElement, InstanceInfo> =
     new Map<HTMLElement, InstanceInfo>();
 
 /**
- * Renders a barchart
+ * Renders a barchart.
+ *
  * @param data — Data in the following format, (an array of objects)
  *              [ {index: number, value: number} ... ]
- * @param container — An HTMLElement in which to draw the histogram
+ * @param container — An HTMLElement in which to draw the histogram. Note that
+ *                    this chart expects to have complete control over the
+ *                    contents of the container and can clear its contents
+ *                    at will.
  * @param opts - optional parameters
  * @param opts.width — width of chart in px
  * @param opts.height — height of chart in px
