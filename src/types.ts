@@ -138,14 +138,13 @@ export interface CSSOptions {
 /**
  * Common visualisation options for '.render' functions.
  */
-export type VisOptions = Partial<VisOpts>;
-interface VisOpts {
-  width: number;
-  height: number;
-  xLabel: string;
-  yLabel: string;
-  xType: 'quantitative'|'ordinal'|'nominal';
-  yType: 'quantitative'|'ordinal'|'nominal';
+export interface VisOptions {
+  width?: number;
+  height?: number;
+  xLabel?: string;
+  yLabel?: string;
+  xType?: 'quantitative'|'ordinal'|'nominal';
+  yType?: 'quantitative'|'ordinal'|'nominal';
 }
 
 export type Drawable = HTMLElement|Surface|{

@@ -6,11 +6,11 @@ with TensorFlow.js.
 It's main features are:
 
 * A set of visualizations useful for visualizing model behaviour
-* A set of hight level functions for visualizing objects specific to TensorFlow.js
+* A set of high level functions for visualizing objects specific to TensorFlow.js
 * A way to organize visualizations of model behaviour that won't interfere with your web application
 
 The library also aims to be flexible and make it easy for you to incorporate
-custom visualizations using tools of your choosing.
+custom visualizations using tools of your choosing, such as d3, Chart.js or plotly.js.
 
 ## Installation
 
@@ -21,9 +21,9 @@ and import it as a standard UMD bundle. The global name exposed is `tfvis`.
 ## Building from source
 
 To build the library, you need to have node.js installed. We use `yarn`
-instead of `npm-cli` but you can use either.
+instead of `npm` but you can use either.
 
-First install depencies with
+First install dependencies with
 
 ```
 yarn
@@ -74,7 +74,7 @@ This should show something like the following
 
 ## Visors, Surfaces and Tabs
 
-### .visor(): () => Visor
+### visor() => Visor
 
 Returns a singleton object with the public API of the visor. This will create
 the necessary DOM elements for the visor on initialization.
@@ -82,17 +82,17 @@ the necessary DOM elements for the visor on initialization.
 Initially calling visor() will create a panel that is displayed on the right. It hovers over your pages content and shouldn't disturb the flow of your page's DOM Elements. It has some display controls and by default also supports the following keyboard shortcuts:
 
  * __`__ (backtick): Shows or hides the visor
- * __~__ (tilde, shift+backtick): Toggles betweeen the two sizes the visor supports
+ * __~__ (tilde, shift+backtick): Toggles betweeen full width and smaller width view of the visor.
 
-The returned object has the following properties. Documented here with the
-prefix visor() and annotated with type information. You can call visor() as much as you want or store a reference
+The returned object has the following properties, documented here with the
+prefix `visor()` and annotated with type information. You can call visor() as much as you want or store a reference
 to the returned object.
 
 #### visor().el: HTMLElement
 
-The containing HTMLElement for the whole visor.
+The containing `HTMLElement` for the whole visor.
 
-#### visor().surface: (options: SurfaceInfo) => Surface;
+#### visor().surface(options: SurfaceInfo) => Surface;
 
 Returns a `Surface`, creating one if necessary. This is the primary container
 of visualizations. Surfaces are organized onto `Tabs`.
@@ -111,7 +111,7 @@ of visualizations. Surfaces are organized onto `Tabs`.
 ```
 
 StyleOptions has the following structure. All properties are optional
-and generally represent css styles that will be added to the `Surface`.
+and generally represent css styles that will be added to the `Surface`. As these are css properties, they can be in any valid css unit e.g. `%` or `px`.
 
 ```ts
 {
@@ -122,34 +122,34 @@ and generally represent css styles that will be added to the `Surface`.
 }
 ```
 
-#### visor().isOpen: () => boolean;
+#### visor().isOpen() => boolean;
 
 Returns true if the visor is currently open/visible.
 
-#### visor().isFullscreen: () => boolean;
+#### visor().isFullscreen() => boolean;
 
 Returns true if the visor is in fullscreen mode. Note that the visor may be in a closed state even if it is in fullscreen mode.
 
-#### visor().open: () => void;
+#### visor().open() => void;
 
-Opens the visor
+Opens the visor.
 
-#### visor().close: () => void;
+#### visor().close() => void;
 
-Closes the visor
+Closes the visor.
 
-#### visor().toggle: () => void;
+#### visor().toggle() => void;
 
-Toggles the visor open and closed
+Toggles the visor open and closed.
 
-#### visor().toggleFullScreen: () => void;
+#### visor().toggleFullScreen() => void;
 
-Toggles the fullscreen mode of the visor
+Toggles the fullscreen mode of the visor.
 
 ### Surface
 
 A surface is the object returned by a call to visor().surface(...). It returns
-an object with no methods and the following properties
+an object with no methods and the following properties:
 
 ```ts
 {

@@ -29,3 +29,7 @@ export function shallowEquals(
 
   return true;
 }
+
+export async function nextFrame() {
+  await new Promise(r => requestAnimationFrame(r));
+}

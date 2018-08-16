@@ -15,55 +15,33 @@
  * =============================================================================
  */
 
+import {View} from 'vega';
 import embed, {Mode, Result as EmbedRes, VisualizationSpec} from 'vega-embed';
+
 import {Drawable, VisOptions} from '../types';
-import {getDrawArea, shallowEquals} from './render_utils';
 
-const defaultOpts = {
-  xLabel: '',
-  yLabel: '',
-  xType: 'ordinal',
-  yType: 'quantitative',
-};
-
-interface InstanceInfo {
-  // Note the type of 'view' is not exported by vega-embed. We could import it
-  // from vega but that would add a direct dependency to vega.
-
-  // tslint:disable-next-line:no-any
-  view: any;
-  lastOptions: VisOptions;
-}
-
-interface Datum {
-  index: number;
-  value: number;
-}
-
-// We keep a map of containers to chart instances in order to reuse the instance
-// where possible.
-const instances: Map<HTMLElement, InstanceInfo> =
-    new Map<HTMLElement, InstanceInfo>();
+import {getDrawArea, nextFrame, shallowEquals} from './render_utils';
 
 /**
  * Renders a barchart.
  *
- * @param data — Data in the following format, (an array of objects)
+ * @param data Data in the following format, (an array of objects)
  *              [ {index: number, value: number} ... ]
- * @param container — An HTMLElement in which to draw the histogram. Note that
+ * @param container An HTMLElement in which to draw the histogram. Note that
  *                    this chart expects to have complete control over the
  *                    contents of the container and can clear its contents
  *                    at will.
- * @param opts - optional parameters
- * @param opts.width — width of chart in px
- * @param opts.height — height of chart in px
- * @param opts.xLabel — label for x-axis, set to null to hide the
- * @param opts.yLabel — label for y-axis, set to null to hide the
+ * @param opts optional parameters
+ * @param opts.width width of chart in px
+ * @param opts.height height of chart in px
+ * @param opts.xLabel label for x-axis, set to null to hide the
+ * @param opts.yLabel label for y-axis, set to null to hide the
  *
  * @returns Promise - indicates completion of rendering
  */
-export function renderBarchart(
-    data: Datum[], container: Drawable, opts: VisOptions = {}): Promise<void> {
+export async function renderBarchart(
+    data: Array<{index: number; value: number;}>, container: Drawable,
+    opts: VisOptions = {}): Promise<void> {
   const drawArea = getDrawArea(container);
   const values = data;
   const options = Object.assign({}, defaultOpts, opts);
@@ -73,17 +51,11 @@ export function renderBarchart(
   if (instances.has(drawArea)) {
     const instanceInfo = instances.get(drawArea)!;
     if (shallowEquals(options, instanceInfo.lastOptions)) {
-      return new Promise((resolve, reject) => {
-        new Promise(r => requestAnimationFrame(r))
-            .then(() => {
-              const view = instanceInfo.view;
-              const changes =
-                  view.changeset().remove(() => true).insert(values);
-              return view.change('values', changes).runAsync();
-            })
-            .then(() => resolve())
-            .catch((e) => reject(e));
-      });
+      await nextFrame();
+      const view = instanceInfo.view;
+      const changes = view.changeset().remove(() => true).insert(values);
+      await view.change('values', changes).runAsync();
+      return;
     }
   }
 
@@ -121,16 +93,27 @@ export function renderBarchart(
     }
   };
 
-  return new Promise((resolve, reject) => {
-    new Promise(r => requestAnimationFrame(r))
-        .then(() => embed(drawArea, spec, embedOpts))
-        .then((res: EmbedRes) => {
-          instances.set(drawArea, {
-            view: res.view,
-            lastOptions: options,
-          });
-          resolve();
-        })
-        .catch((e) => reject(e));
+  await nextFrame();
+  const embedRes = await embed(drawArea, spec, embedOpts);
+  instances.set(drawArea, {
+    view: embedRes.view,
+    lastOptions: options,
   });
+}
+
+const defaultOpts = {
+  xLabel: '',
+  yLabel: '',
+  xType: 'ordinal',
+  yType: 'quantitative',
+};
+
+// We keep a map of containers to chart instances in order to reuse the instance
+// where possible.
+const instances: Map<HTMLElement, InstanceInfo> =
+    new Map<HTMLElement, InstanceInfo>();
+
+interface InstanceInfo {
+  view: View;
+  lastOptions: VisOptions;
 }

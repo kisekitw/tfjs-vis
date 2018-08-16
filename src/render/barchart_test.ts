@@ -17,11 +17,11 @@
 
 import {renderBarchart} from './barchart';
 
-beforeEach(() => {
-  document.body.innerHTML = '<div id="container"></div>';
-});
-
 describe('Visor Singleton', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="container"></div>';
+  });
+
   it('renders a bar chart', async () => {
     const data = [
       {index: 0, value: 50},

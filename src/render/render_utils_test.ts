@@ -18,11 +18,11 @@
 import {visor} from '../index';
 import {getDrawArea, shallowEquals} from './render_utils';
 
-beforeEach(() => {
-  document.body.innerHTML = '<div id="container"></div>';
-});
-
 describe('shallowEqual', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="container"></div>';
+  });
+
   it('returns true for similar objects', async () => {
     const a = {
       stringProp: 'astring',
@@ -76,6 +76,10 @@ describe('shallowEqual', () => {
 });
 
 describe('getDrawArea', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="container"></div>';
+  });
+
   it('works with HTMLElement', async () => {
     const el = document.getElementById('container') as HTMLElement;
     expect(getDrawArea(el)).toEqual(el);
