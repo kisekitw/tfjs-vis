@@ -331,7 +331,7 @@ describe('accuracy', () => {
 // accuracy
 //
 describe('per class accuracy', () => {
-  it('computes accuracy', async () => {
+  it('computes per class accuracy', async () => {
     const labels = tf.tensor1d([0, 0, 1, 2, 2, 2]);
     const predictions = tf.tensor1d([0, 0, 0, 2, 1, 1]);
 
@@ -339,7 +339,7 @@ describe('per class accuracy', () => {
     expect(result).toEqual([1, 0, 1 / 3]);
   });
 
-  it('computes accuracy, no matches', async () => {
+  it('computes per class accuracy, no matches', async () => {
     const labels = tf.tensor1d([1, 1, 1, 1, 1]);
     const predictions = tf.tensor1d([0, 0, 0, 0, 0]);
 
@@ -347,7 +347,7 @@ describe('per class accuracy', () => {
     expect(result).toEqual([0, 0]);
   });
 
-  it('computes accuracy, all matches', async () => {
+  it('computes per class accuracy, all matches', async () => {
     const labels = tf.tensor1d([0, 1, 2, 3, 3, 3]);
     const predictions = tf.tensor1d([0, 1, 2, 3, 3, 3]);
 
@@ -355,7 +355,7 @@ describe('per class accuracy', () => {
     expect(result).toEqual([1, 1, 1, 1]);
   });
 
-  it('computes accuracy, explicit numClasses', async () => {
+  it('computes per class accuracy, explicit numClasses', async () => {
     const labels = tf.tensor1d([0, 1, 2, 2]);
     const predictions = tf.tensor1d([0, 1, 2, 1]);
 
@@ -391,5 +391,21 @@ describe('per class accuracy', () => {
     }
 
     expect(errorMessage).toEqual('predictions must be a 1D tensor');
+  });
+
+  it('errors on tensors of different lengths', async () => {
+    const labels = tf.tensor1d([1, 2, 4]);
+    const predictions = tf.tensor1d([2, 2, 4, 3, 6]);
+
+    let errorMessage;
+    try {
+      //@ts-ignore
+      await perClassAccuracy(labels, predictions);
+    } catch (e) {
+      errorMessage = e.message;
+    }
+
+    expect(errorMessage)
+        .toEqual('labels and predictions must be the same length');
   });
 });

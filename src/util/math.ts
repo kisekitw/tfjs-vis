@@ -137,11 +137,18 @@ export async function tensorStats(input: Tensor): Promise<HistogramStats> {
 }
 
 /**
- * Computes a confusion matrix from predictions and labels
+ * Computes a confusion matrix from predictions and labels. Each value in
+ * labels and predictions should correspond to some output class. It is assumed
+ * that these values go from 0 - numClasses.
  *
- * @param labels
- * @param predictions
- * @param numClasses
+ * @param labels 1D tensor of true values
+ * @param predictions 1D tensor of predicted values
+ * @param numClasses Number of distinct classes. Optional. If not passed in
+ *  numClasses will equal the highest number in either labels or predictions
+ *  plus 1
+ * @param weights 1d tensor that is the same size as predictions.
+ *  If weights is passed in then each prediction contributes its corresponding
+ *  weight to the total value of the confusion matrix cell.
  */
 export async function confusionMatrix(
     labels: Tensor1D, predictions: Tensor1D, numClasses?: number,
@@ -197,8 +204,8 @@ export async function confusionMatrix(
 /**
  * Computes how often predictions matches labels
  *
- * @param labels
- * @param predictions
+ * @param labels tensor of true values
+ * @param predictions tensor of predicted values
  */
 export async function accuracy(
     labels: Tensor, predictions: Tensor): Promise<number> {
@@ -215,10 +222,15 @@ export async function accuracy(
 }
 
 /**
- * Computes per class accuracy between prediction and labels
+ * Computes per class accuracy between prediction and labels. Each value in
+ * labels and predictions should correspond to some output class. It is assumed
+ * that these values go from 0 - numClasses.
  *
- * @param labels
- * @param predictions
+ * @param labels 1D tensor of true values
+ * @param predictions 1D tensor of predicted values
+ * @param numClasses Number of distinct classes. Optional. If not passed in
+ *  numClasses will equal the highest number in either labels or predictions
+ *  plus 1
  */
 export async function perClassAccuracy(
     labels: Tensor1D, predictions: Tensor1D,
