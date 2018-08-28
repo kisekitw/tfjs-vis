@@ -17,7 +17,7 @@
 
 import * as tf from '@tensorflow/tfjs';
 
-import {arrayStats, tensorStats} from './math';
+import {arrayStats, confusionMatrix, tensorStats} from './math';
 
 //
 // arrayStats
@@ -123,4 +123,62 @@ describe('tensorStats', () => {
     expect(stats.numNans).toBe(4);
     expect(stats.numZeros).toBe(0);
   });
+});
+
+//
+// confusionMatrix
+//
+describe('confusionMatrix', () => {
+  it('computes a confusion matrix', async () => {
+    const labels = tf.tensor1d([1, 2, 4]);
+    const predictions = tf.tensor1d([2, 2, 4]);
+
+    const expected = [
+      [0, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 1],
+    ];
+
+    const result = await confusionMatrix(labels, predictions);
+    expect(result).toEqual(expected);
+  });
+
+  it('computes a confusion matrix with explicit numClasses', async () => {
+    const labels = tf.tensor1d([1, 2, 4]);
+    const predictions = tf.tensor1d([2, 2, 4]);
+    const numClasses = 6;
+
+    const expected = [
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0, 0],
+      [0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 0, 0],
+    ];
+
+    const result = await confusionMatrix(labels, predictions, numClasses);
+    expect(result).toEqual(expected);
+  });
+
+  // it('errors on non 1d tensors', () => {
+  //   const labels = tf.tensor([1, 2, 4, 4], [2, 2]);
+  //   const predictions = tf.tensor([2, 2, 4, 3], [2, 2]);
+
+  //   expect(() => {
+  //     //@ts-ignore
+  //     confusionMatrix(labels, predictions);
+  //   }).toThrow();
+  // });
+
+  // it('errors on tensors of different lengths', () => {
+  //   const labels = tf.tensor1d([1, 2, 4]);
+  //   const predictions = tf.tensor1d([2, 2, 4, 3, 6]);
+
+  //   expect(() => {
+  //     confusionMatrix(labels, predictions);
+  //   }).toThrow();
+  // });
 });
