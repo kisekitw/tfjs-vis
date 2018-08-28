@@ -17,7 +17,7 @@
 
 import * as tf from '@tensorflow/tfjs';
 
-import {accuracy, arrayStats, confusionMatrix, tensorStats} from './math';
+import {accuracy, arrayStats, confusionMatrix, perClassAccuracy, tensorStats} from './math';
 import {DECIMAL_PLACES_TO_CHECK} from './utils';
 
 //
@@ -310,7 +310,7 @@ describe('accuracy', () => {
     expect(result).toBeCloseTo(5 / 6, DECIMAL_PLACES_TO_CHECK);
   });
 
-  it('errors on non tensors of different shapes', async () => {
+  it('errors on tensors of different shapes', async () => {
     const labels = tf.tensor1d([1, 2, 4, 4]);
     const predictions = tf.tensor([2, 2, 4, 3], [2, 2]);
 
@@ -324,5 +324,72 @@ describe('accuracy', () => {
 
     expect(errorMessage)
         .toEqual('Error computing accuracy. Shapes 4 and 2,2 must match');
+  });
+});
+
+//
+// accuracy
+//
+describe('per class accuracy', () => {
+  it('computes accuracy', async () => {
+    const labels = tf.tensor1d([0, 0, 1, 2, 2, 2]);
+    const predictions = tf.tensor1d([0, 0, 0, 2, 1, 1]);
+
+    const result = await perClassAccuracy(labels, predictions);
+    expect(result).toEqual([1, 0, 1 / 3]);
+  });
+
+  it('computes accuracy, no matches', async () => {
+    const labels = tf.tensor1d([1, 1, 1, 1, 1]);
+    const predictions = tf.tensor1d([0, 0, 0, 0, 0]);
+
+    const result = await perClassAccuracy(labels, predictions);
+    expect(result).toEqual([0, 0]);
+  });
+
+  it('computes accuracy, all matches', async () => {
+    const labels = tf.tensor1d([0, 1, 2, 3, 3, 3]);
+    const predictions = tf.tensor1d([0, 1, 2, 3, 3, 3]);
+
+    const result = await perClassAccuracy(labels, predictions);
+    expect(result).toEqual([1, 1, 1, 1]);
+  });
+
+  it('computes accuracy, explicit numClasses', async () => {
+    const labels = tf.tensor1d([0, 1, 2, 2]);
+    const predictions = tf.tensor1d([0, 1, 2, 1]);
+
+    const result = await perClassAccuracy(labels, predictions, 5);
+    expect(result).toEqual([1, 1, 0.5, 0, 0]);
+  });
+
+  it('errors on non 1d label tensor', async () => {
+    const labels = tf.tensor([1, 2, 4, 4], [2, 2]);
+    const predictions = tf.tensor1d([2, 2, 4, 3]);
+
+    let errorMessage;
+    try {
+      //@ts-ignore
+      await perClassAccuracy(labels, predictions);
+    } catch (e) {
+      errorMessage = e.message;
+    }
+
+    expect(errorMessage).toEqual('labels must be a 1D tensor');
+  });
+
+  it('errors on non 1d prediction tensor', async () => {
+    const labels = tf.tensor1d([1, 2, 4, 4]);
+    const predictions = tf.tensor([2, 2, 4, 3], [2, 2]);
+
+    let errorMessage;
+    try {
+      //@ts-ignore
+      await perClassAccuracy(labels, predictions);
+    } catch (e) {
+      errorMessage = e.message;
+    }
+
+    expect(errorMessage).toEqual('predictions must be a 1D tensor');
   });
 });

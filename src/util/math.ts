@@ -180,13 +180,13 @@ export async function confusionMatrix(
         }
 
         for (let i = 0; i < labelsArray.length; i++) {
-          const labelIndex = labelsArray[i];
-          const predIndex = predsArray[i];
+          const label = labelsArray[i];
+          const pred = predsArray[i];
 
           if (weightsArray != null) {
-            result[labelIndex][predIndex] += weightsArray[i];
+            result[label][pred] += weightsArray[i];
           } else {
-            result[labelIndex][predIndex] += 1;
+            result[label][pred] += 1;
           }
         }
 
@@ -212,4 +212,53 @@ export async function accuracy(
 
   dispose([eq, mean]);
   return acc;
+}
+
+/**
+ * Computes per class accuracy between prediction and labels
+ *
+ * @param labels
+ * @param predictions
+ */
+export async function perClassAccuracy(
+    labels: Tensor1D, predictions: Tensor1D,
+    numClasses?: number): Promise<number[]> {
+  assert(labels.rank === 1, 'labels must be a 1D tensor');
+  assert(predictions.rank === 1, 'predictions must be a 1D tensor');
+  assert(
+      labels.size === predictions.size,
+      'labels and predictions must be the same length');
+
+  let numClasses_: number;
+  if (numClasses == null) {
+    numClasses_ = tidy(() => {
+      return maximum(labels.max(), predictions.max()).dataSync()[0] + 1;
+    });
+  } else {
+    numClasses_ = numClasses;
+  }
+
+  return Promise.all([labels.data(), predictions.data()])
+      .then(([labelsArray, predsArray]) => {
+        // Per class total counts
+        const count: number[] = Array(numClasses_).fill(0);
+        // Per class accuracy
+        const result: number[] = Array(numClasses_).fill(0);
+
+        for (let i = 0; i < labelsArray.length; i++) {
+          const label = labelsArray[i];
+          const pred = predsArray[i];
+
+          count[label] += 1;
+          if (label === pred) {
+            result[label] += 1;
+          }
+        }
+
+        for (let i = 0; i < result.length; i++) {
+          result[i] = count[i] === 0 ? 0 : result[i] / count[i];
+        }
+
+        return result;
+      });
 }
