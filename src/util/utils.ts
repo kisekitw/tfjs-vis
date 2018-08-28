@@ -1,4 +1,4 @@
-import {message} from 'vega-lite/build/src/log';
+import {TypedArray} from '../types';
 
 /*
  * @license
@@ -25,3 +25,25 @@ export function assert(expr: boolean, msg: string|(() => string)) {
     throw new Error(typeof msg === 'string' ? msg : msg());
   }
 }
+
+export function assertShapesMatch(
+    shapeA: number[], shapeB: number[], errorMessagePrefix = ''): void {
+  assert(
+      arraysEqual(shapeA, shapeB),
+      errorMessagePrefix + ` Shapes ${shapeA} and ${shapeB} must match`);
+}
+
+export function arraysEqual(n1: number[]|TypedArray, n2: number[]|TypedArray) {
+  if (n1.length !== n2.length) {
+    return false;
+  }
+  for (let i = 0; i < n1.length; i++) {
+    if (n1[i] !== n2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Number of decimal places to  when checking float similarity
+export const DECIMAL_PLACES_TO_CHECK = 4;

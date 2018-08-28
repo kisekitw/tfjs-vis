@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {max, maximum, scalar, Tensor, Tensor1D, tidy} from '@tensorflow/tfjs';
+import {dispose, maximum, scalar, Tensor, Tensor1D, tidy} from '@tensorflow/tfjs';
 
-import {ConfusionMatrixData, HistogramStats} from '../types';
+import {HistogramStats, TypedArray} from '../types';
 
-import {assert} from './utils';
+import {assert, assertShapesMatch} from './utils';
 
 /**
  * Returns summary statistics for an array of numbers
@@ -137,19 +137,25 @@ export async function tensorStats(input: Tensor): Promise<HistogramStats> {
 }
 
 /**
+ * Computes a confusion matrix from predictions and labels
  *
  * @param labels
  * @param predictions
  * @param numClasses
  */
 export async function confusionMatrix(
-    labels: Tensor1D, predictions: Tensor1D,
-    numClasses?: number): Promise<number[][]> {
+    labels: Tensor1D, predictions: Tensor1D, numClasses?: number,
+    weights?: Tensor1D): Promise<number[][]> {
   assert(labels.rank === 1, 'labels must be a 1D tensor');
   assert(predictions.rank === 1, 'predictions must be a 1D tensor');
   assert(
       labels.size === predictions.size,
       'labels and predictions must be the same length');
+  if (weights != null) {
+    assert(
+        weights.size === predictions.size,
+        'labels and predictions must be the same length');
+  }
 
   let numClasses_: number;
   if (numClasses == null) {
@@ -160,8 +166,13 @@ export async function confusionMatrix(
     numClasses_ = numClasses;
   }
 
-  return Promise.all([labels.data(), predictions.data()])
-      .then(([labelsArray, predsArray]) => {
+  let weightsPromise: Promise<null|TypedArray> = Promise.resolve(null);
+  if (weights != null) {
+    weightsPromise = weights.data();
+  }
+
+  return Promise.all([labels.data(), predictions.data(), weightsPromise])
+      .then(([labelsArray, predsArray, weightsArray]) => {
         const result: number[][] = Array(numClasses_).fill(0);
         // Initialize the matrix
         for (let i = 0; i < numClasses_; i++) {
@@ -172,9 +183,33 @@ export async function confusionMatrix(
           const labelIndex = labelsArray[i];
           const predIndex = predsArray[i];
 
-          result[labelIndex][predIndex] += 1;
+          if (weightsArray != null) {
+            result[labelIndex][predIndex] += weightsArray[i];
+          } else {
+            result[labelIndex][predIndex] += 1;
+          }
         }
 
         return result;
       });
+}
+
+/**
+ * Computes how often predictions matches labels
+ *
+ * @param labels
+ * @param predictions
+ */
+export async function accuracy(
+    labels: Tensor, predictions: Tensor): Promise<number> {
+  assertShapesMatch(
+      labels.shape, predictions.shape, 'Error computing accuracy.');
+
+  const eq = labels.equal(predictions);
+  const mean = eq.mean();
+
+  const acc = (await mean.data())[0];
+
+  dispose([eq, mean]);
+  return acc;
 }
