@@ -318,7 +318,7 @@ like accuracy or creating confusion matrices.
 
 Computes a confusion matrix from predictions and labels. Each value in
 labels and predictions should correspond to some output class. It is assumed
-that these values go from 0 - numClasses.
+that these values go from 0 to numClasses - 1.
 
 The result will be a 2D array of size numClasses * numClasses
 
@@ -335,7 +335,7 @@ The result will be a 2D array of size numClasses * numClasses
 
 ## metrics.perClassAccuracy(labels: Tensor1D, predictions: Tensor1D, numClasses?: number, weights?: Tensor1D) => Promise<number[]>
 
-Computes per class accuracy between prediction and labels. Each value in labels and predictions should correspond to some output class. It is assumed that these values go from 0 - numClasses.
+Computes per class accuracy between prediction and labels. Each value in labels and predictions should correspond to some output class. It is assumed that these values go from 0 to  numClasses - 1.
 
 
 * @param labels 1D tensor of true values
@@ -347,7 +347,7 @@ Computes per class accuracy between prediction and labels. Each value in labels 
 
 ## metrics.accuracy(labels: Tensor, predictions: Tensor) => Promise<number>
 
-Computes how often predictions matches labels
+Computes how often predictions matches labels.
 
 * @param labels tensor of true values
 * @param predictions tensor of predicted values

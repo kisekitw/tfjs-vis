@@ -139,7 +139,7 @@ export async function tensorStats(input: Tensor): Promise<HistogramStats> {
 /**
  * Computes a confusion matrix from predictions and labels. Each value in
  * labels and predictions should correspond to some output class. It is assumed
- * that these values go from 0 - numClasses.
+ * that these values go from 0 to numClasses - 1.
  *
  * @param labels 1D tensor of true values
  * @param predictions 1D tensor of predicted values
@@ -164,13 +164,11 @@ export async function confusionMatrix(
         'labels and predictions must be the same length');
   }
 
-  let numClasses_: number;
   if (numClasses == null) {
-    numClasses_ = tidy(() => {
-      return maximum(labels.max(), predictions.max()).dataSync()[0] + 1;
-    });
-  } else {
-    numClasses_ = numClasses;
+    numClasses =
+        tidy(() => {
+          return maximum(labels.max(), predictions.max()).dataSync()[0] + 1;
+        }) as number;
   }
 
   let weightsPromise: Promise<null|TypedArray> = Promise.resolve(null);
@@ -180,10 +178,10 @@ export async function confusionMatrix(
 
   return Promise.all([labels.data(), predictions.data(), weightsPromise])
       .then(([labelsArray, predsArray, weightsArray]) => {
-        const result: number[][] = Array(numClasses_).fill(0);
+        const result: number[][] = Array(numClasses).fill(0);
         // Initialize the matrix
-        for (let i = 0; i < numClasses_; i++) {
-          result[i] = Array(numClasses_).fill(0);
+        for (let i = 0; i < numClasses!; i++) {
+          result[i] = Array(numClasses).fill(0);
         }
 
         for (let i = 0; i < labelsArray.length; i++) {
@@ -224,7 +222,7 @@ export async function accuracy(
 /**
  * Computes per class accuracy between prediction and labels. Each value in
  * labels and predictions should correspond to some output class. It is assumed
- * that these values go from 0 - numClasses.
+ * that these values go from 0 to numClasses - 1.
  *
  * @param labels 1D tensor of true values
  * @param predictions 1D tensor of predicted values
