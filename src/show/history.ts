@@ -27,7 +27,12 @@ export function history(
   let values: Point2D[][];
   if (Array.isArray(history)) {
     values = metrics.map(metric => {
-      return history.map((log, x) => ({x, y: log[metric]}));
+      return history.reduce((memo: Point2D[], log, x) => {
+        if (log[metric] != null) {
+          memo.push({x, y: log[metric]});
+        }
+        return memo;
+      }, []);
     });
   } else {
     // Is a history object
@@ -36,12 +41,18 @@ export function history(
     });
   }
 
+  // Remove collections that are empty because the logs object doesn't have
+  // an entry for that metric.
+  values = values.filter((v) => v.length > 0);
+
   // Dispatch to render func
-  const series = metrics;
-  renderLinechart({values, series}, drawArea, {
-    xLabel: 'Iteration',
-    yLabel: 'Value',
-  });
+  if (values.length > 0) {
+    const series = metrics;
+    renderLinechart({values, series}, drawArea, {
+      xLabel: 'Iteration',
+      yLabel: 'Value',
+    });
+  }
 }
 
 /**
