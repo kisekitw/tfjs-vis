@@ -35,7 +35,6 @@ export async function history(
       }, []);
     });
   } else {
-    // Is a history object
     values = metrics.map(metric => {
       return (history.history[metric] as number[]).map((y, x) => ({x, y}));
     });

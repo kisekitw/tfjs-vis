@@ -164,6 +164,34 @@ an object with no methods and the following properties:
 
 Generally speaking you would only access `.drawArea` to add plots and other renders.
 
+## Show Functions
+
+This library exposes a `show` namespace that provides a number of higher level functions useful for rendering tfjs concepts. They lean towards being opinionated
+rather than flexible but are generally combinations of `Renderers` (see below), so one can easily roll their own.
+
+### Model Training Visualization
+
+## show.history(container: Surface, history: HistoryLike,  metrics: string[]) => Promise<void>
+
+Renders a tf.Model training 'History'.
+
+* @param container A `Surface` or `{name: string, tab?: string}` object specifying which surface to render to.
+* @param history A history-like object. Either a tfjs-layers `History` object or an array of tfjs-layers `Logs` objects. `Logs` are produced by the callbacks on [model.fit](https://js.tensorflow.org/api/latest/#tf.Model.fit) and a `History` object is returned from [model.fit](https://js.tensorflow.org/api/latest/#tf.Model.fit).
+* @param metrics An array of strings reprenting training metrics of a [tf.model](https://js.tensorflow.org/api/latest/#tf.Model.compile)
+
+
+## show.fitCallbacks(container: Surface  metrics: string[]) => Promise<void>
+
+
+Returns a collection of callbacks to pass to tf.Model.fit. Callbacks are returned for the following events, `onBatchEnd` & `onEpochEnd`.
+
+See [model.fit](https://js.tensorflow.org/api/latest/#tf.Model.fit) for more info
+on how to pass in callback functions to the training process.
+
+* @param container A `Surface` or `{name: string, tab?: string}` object specifying which surface to render to.
+* @param metrics An array of strings reprenting training metrics of a [tf.model](https://js.tensorflow.org/api/latest/#tf.Model.compile)
+
+
 
 ## Renderers
 
