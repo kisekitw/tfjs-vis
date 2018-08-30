@@ -1,4 +1,3 @@
-import {History} from '@tensorflow/tfjs-layers/dist/base_callbacks';
 import {Logs} from '@tensorflow/tfjs-layers/dist/logs';
 
 import {renderLinechart} from '../render/linechart';
@@ -17,8 +16,9 @@ import {subSurface} from '../util/dom';
  *    object. Using this allows you to control which metrics appear on the same
  *    plot.
  */
-export function history(
-    container: Drawable, history: HistoryLike, metrics: string[]) {
+export async function history(
+    container: Drawable, history: HistoryLike,
+    metrics: string[]): Promise<void> {
   // Get the draw surface
   const drawArea = getDrawArea(container);
 
@@ -48,7 +48,7 @@ export function history(
   // Dispatch to render func
   if (values.length > 0) {
     const series = metrics;
-    renderLinechart({values, series}, drawArea, {
+    return renderLinechart({values, series}, drawArea, {
       xLabel: 'Iteration',
       yLabel: 'Value',
     });
@@ -99,7 +99,11 @@ export function fitCallbacks(
   return callbacks;
 }
 
-type HistoryLike = Logs[]|History;
+type HistoryLike = Logs[]|{
+  history: {
+    [key: string]: number[],
+  }
+};
 interface FitCallbackHandlers {
   [key: string]: (iteration: number, log: Logs) => Promise<void>;
 }
