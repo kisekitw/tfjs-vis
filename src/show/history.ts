@@ -27,11 +27,11 @@ export async function history(
   let values: Point2D[][];
   if (Array.isArray(history)) {
     values = metrics.map(metric => {
-      return history.reduce((memo: Point2D[], log, x) => {
+      return history.reduce((points: Point2D[], log: Logs, x: number) => {
         if (log[metric] != null) {
-          memo.push({x, y: log[metric]});
+          points.push({x, y: log[metric]});
         }
-        return memo;
+        return points;
       }, []);
     });
   } else {
@@ -42,7 +42,7 @@ export async function history(
 
   // Remove collections that are empty because the logs object doesn't have
   // an entry for that metric.
-  values = values.filter((v) => v.length > 0);
+  values = values.filter(v => v.length > 0);
 
   // Dispatch to render func
   if (values.length > 0) {
@@ -90,12 +90,12 @@ export function fitCallbacks(
     };
   }
 
-  const callbacks = callbackNames.reduce((memo: FitCallbackHandlers, name) => {
-    memo[name] = makeCallbackFor(name);
-    return memo;
-  }, {});
-
-  return callbacks;
+  return callbackNames.reduce(
+      (callbacks: FitCallbackHandlers, name: string) => {
+        callbacks[name] = makeCallbackFor(name);
+        return callbacks;
+      },
+      {});
 }
 
 type HistoryLike = Logs[]|{
