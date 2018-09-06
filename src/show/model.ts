@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
-import {Layer, SymbolicTensor} from '@tensorflow/tfjs-layers/dist/engine/topology';
+import {Layer} from '@tensorflow/tfjs-layers/dist/engine/topology';
 
 import {renderHistogram} from '../render/histogram';
 import {getDrawArea} from '../render/render_utils';
