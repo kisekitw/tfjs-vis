@@ -23,6 +23,7 @@ import {renderScatterplot} from './render/scatterplot';
 import {renderTable} from './render/table';
 import {fitCallbacks, history} from './show/history';
 import {confusionMatrix as showConfusionMatrix, perClassAccuracy as showPerClassAccuracy} from './show/quality';
+import {distribution} from './show/tensor';
 import {accuracy, confusionMatrix, perClassAccuracy} from './util/math';
 
 const render = {
@@ -45,6 +46,7 @@ const show = {
   fitCallbacks,
   perClassAccuracy: showPerClassAccuracy,
   confusionMatrix: showConfusionMatrix,
+  distribution,
 };
 
 export {visor} from './visor';
