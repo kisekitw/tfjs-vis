@@ -8,6 +8,13 @@ import {Drawable, HistogramStats} from '../types';
 import {subSurface} from '../util/dom';
 import {tensorStats} from '../util/math';
 
+/**
+ * Renders a summary of a tf.Model. Displays a table with layer information. *
+ *
+ * @param container A `{name: string, tab?: string}` object specifying which
+ *     surface to render to.
+ * @param model
+ */
 export async function modelSummary(container: Drawable, model: tf.Model) {
   const drawArea = getDrawArea(container);
   const summary = getModelSummary(model);
@@ -30,6 +37,14 @@ export async function modelSummary(container: Drawable, model: tf.Model) {
   renderTable({headers, values}, drawArea);
 }
 
+/**
+ * Renders summary information about a layer and a histogram of parameters in
+ * that layer.
+ *
+ * @param container A `{name: string, tab?: string}` object specifying which
+ *     surface to render to.
+ * @param layer a `tf.layers.Layer`
+ */
 export async function layer(container: Drawable, layer: Layer) {
   const drawArea = getDrawArea(container);
   const details = await getLayerDetails(layer);

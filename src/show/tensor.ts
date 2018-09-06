@@ -10,7 +10,7 @@ import {tensorStats} from '../util/math';
  *
  * @param container A `{name: string, tab?: string}` object specifying which
  *  surface to render to.
- * @param tensor
+ * @param tensor the input tensor
  */
 export async function distribution(container: Drawable, tensor: Tensor) {
   const drawArea = getDrawArea(container);
