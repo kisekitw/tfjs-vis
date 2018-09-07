@@ -219,7 +219,7 @@ Renders a confusion matrix for classification task evaluation
 * @param classLabels An array of string labels for the classes in
   `classAccuracy`. Optional.
 
-## show.distribution(container: Drawable, tensor: Tensor) => Promise<void>
+## show.valuesDistribution(container: Drawable, tensor: Tensor) => Promise<void>
 
 Renders a histogram showing the distribution of all values in a tensor.
 
@@ -235,7 +235,7 @@ Renders a summary of a `tf.Model`. Displays a table with layer information.
   surface to render to.
 * @param model a `tf.Model`
 
-## show.layerlayer(container: Drawable, layer: Layer) => Promise<void>
+## show.layer(container: Drawable, layer: Layer) => Promise<void>
 
 Renders summary information about a layer and a histogram of parameter values in that layer.
 

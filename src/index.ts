@@ -24,7 +24,7 @@ import {renderTable} from './render/table';
 import {fitCallbacks, history} from './show/history';
 import {layer, modelSummary} from './show/model';
 import {showConfusionMatrix, showPerClassAccuracy} from './show/quality';
-import {distribution} from './show/tensor';
+import {valuesDistribution} from './show/tensor';
 import {accuracy, confusionMatrix, perClassAccuracy} from './util/math';
 
 const render = {
@@ -47,7 +47,7 @@ const show = {
   fitCallbacks,
   perClassAccuracy: showPerClassAccuracy,
   confusionMatrix: showConfusionMatrix,
-  distribution,
+  valuesDistribution,
   layer,
   modelSummary,
 };

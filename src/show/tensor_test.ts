@@ -16,7 +16,7 @@
  */
 
 import * as tf from '@tensorflow/tfjs';
-import {distribution} from './tensor';
+import {valuesDistribution} from './tensor';
 
 describe('perClassAccuracy', () => {
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe('perClassAccuracy', () => {
     const container = {name: 'Test'};
     const tensor = tf.tensor1d([0, 0, 0, 0, 2, 3, 4]);
 
-    await distribution(container, tensor);
+    await valuesDistribution(container, tensor);
     expect(document.querySelectorAll('table').length).toBe(1);
     expect(document.querySelectorAll('.vega-embed').length).toBe(1);
   });

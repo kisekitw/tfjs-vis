@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2018 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =============================================================================
+ */
+
 import * as tf from '@tensorflow/tfjs';
 import {Layer} from '@tensorflow/tfjs-layers/dist/engine/topology';
 
@@ -9,7 +26,7 @@ import {subSurface} from '../util/dom';
 import {tensorStats} from '../util/math';
 
 /**
- * Renders a summary of a tf.Model. Displays a table with layer information. *
+ * Renders a summary of a tf.Model. Displays a table with layer information.
  *
  * @param container A `{name: string, tab?: string}` object specifying which
  *     surface to render to.
@@ -50,12 +67,13 @@ export async function layer(container: Drawable, layer: Layer) {
   const details = await getLayerDetails(layer);
 
   const headers = [
-    'Tensor Name',
+    'Weight Name',
     'Shape',
     'Min',
     'Max',
     '# Zeros',
     '# NaNs',
+    '# Infinity',
   ];
 
   // Show layer summary
@@ -63,7 +81,7 @@ export async function layer(container: Drawable, layer: Layer) {
   const detailValues = details.map(
       l =>
           [l.name, l.shape, l.stats.min, l.stats.max, l.stats.numZeros,
-           l.stats.numNans]);
+           l.stats.numNans, l.stats.numInfs]);
   renderTable({headers, values: detailValues}, weightsInfoSurface);
 
   // Show layer distribution
@@ -76,7 +94,8 @@ export async function layer(container: Drawable, layer: Layer) {
   }
 
   const layerValuesHistogram = subSurface(drawArea, 'param-distribution');
-  renderHistogram(values, layerValuesHistogram, {height: 150, width: 460});
+  renderHistogram(
+      values, layerValuesHistogram, {height: 150, width: 460, stats: false});
 }
 
 //
@@ -92,7 +111,7 @@ function getModelSummary(model: tf.Model) {
 /*
  * Gets summary information/metadata about a layer.
  */
-function getLayerSummary(layer: Layer) {
+function getLayerSummary(layer: Layer): LayerSummary {
   let outputShape: string;
   if (Array.isArray(layer.outputShape[0])) {
     const shapes = (layer.outputShape as number[][]).map(s => formatShape(s));
@@ -109,12 +128,18 @@ function getLayerSummary(layer: Layer) {
   };
 }
 
+interface LayerSummary {
+  name: string;
+  trainable: boolean;
+  parameters: number;
+  outputShape: string;
+}
+
 /*
  * Gets summary stats and shape for all weights in a layer.
  */
 async function getLayerDetails(layer: Layer): Promise<Array<
     {name: string, stats: HistogramStats, shape: string, weight: tf.Tensor}>> {
-  // TODO consider writing an async getWeights utility
   const weights = layer.getWeights();
   const layerVariables = layer.weights;
   const statsPromises = weights.map(tensorStats);
@@ -130,6 +155,9 @@ async function getLayerDetails(layer: Layer): Promise<Array<
 
 function formatShape(shape: number[]): string {
   const oShape: Array<number|string> = shape.slice();
+  if (oShape.length === 0) {
+    return 'Scalar';
+  }
   if (oShape[0] === null) {
     oShape[0] = 'batch';
   }

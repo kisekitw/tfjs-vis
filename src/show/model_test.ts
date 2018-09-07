@@ -46,8 +46,8 @@ describe('layer', () => {
     model.add(dense);
     model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
     await layer(container, dense);
-    expect(document.querySelectorAll('table').length).toBe(2);
-    expect(document.querySelectorAll('tr').length).toBe(5);
+    expect(document.querySelectorAll('table').length).toBe(1);
+    expect(document.querySelectorAll('tr').length).toBe(3);
     expect(document.querySelectorAll('.vega-embed').length).toBe(1);
   });
 });
