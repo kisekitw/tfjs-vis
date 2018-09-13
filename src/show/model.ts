@@ -71,6 +71,7 @@ export async function layer(container: Drawable, layer: Layer) {
     'Shape',
     'Min',
     'Max',
+    '# Params',
     '# Zeros',
     '# NaNs',
     '# Infinity',
@@ -80,8 +81,9 @@ export async function layer(container: Drawable, layer: Layer) {
   const weightsInfoSurface = subSurface(drawArea, 'layer-weights-info');
   const detailValues = details.map(
       l =>
-          [l.name, l.shape, l.stats.min, l.stats.max, l.stats.numZeros,
-           l.stats.numNans, l.stats.numInfs]);
+          [l.name, l.shape, l.stats.min, l.stats.max, l.weight.size,
+           l.stats.numZeros, l.stats.numNans, l.stats.numInfs]);
+
   renderTable({headers, values: detailValues}, weightsInfoSurface);
 
   const histogramSelectorSurface = subSurface(drawArea, 'select-layer');
