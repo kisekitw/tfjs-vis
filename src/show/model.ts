@@ -84,18 +84,19 @@ export async function layer(container: Drawable, layer: Layer) {
            l.stats.numNans, l.stats.numInfs]);
   renderTable({headers, values: detailValues}, weightsInfoSurface);
 
-  // Show layer distribution
-  const weights = await Promise.all(details.map(l => l.weight.data()));
-  const values: number[] = [];
-  for (const weight of weights) {
-    for (let i = 0; i < weight.length; i++) {
-      values.push(weight[i]);
-    }
-  }
-
+  const histogramSelectorSurface = subSurface(drawArea, 'select-layer');
   const layerValuesHistogram = subSurface(drawArea, 'param-distribution');
-  renderHistogram(
-      values, layerValuesHistogram, {height: 150, width: 460, stats: false});
+
+  const handleSelection = async (layerName: string) => {
+    const layer = details.filter(d => d.name === layerName)[0];
+    const weights = await layer.weight.data();
+
+    renderHistogram(
+        weights, layerValuesHistogram, {height: 150, width: 460, stats: false});
+  };
+
+  addHistogramSelector(
+      details.map(d => d.name), histogramSelectorSurface, handleSelection);
 }
 
 //
@@ -162,4 +163,28 @@ function formatShape(shape: number[]): string {
     oShape[0] = 'batch';
   }
   return `[${oShape.join(',')}]`;
+}
+
+function addHistogramSelector(
+    items: string[], parent: HTMLElement,
+    // tslint:disable-next-line:no-any
+    selectionHandler: (item: string) => any) {
+  const select = `
+    <select>
+      ${items.map((i) => `<option value=${i}>${i}</option>`)}
+    </select>
+  `;
+
+  const button = `<button>Show Values Distribution for:</button>`;
+  const content = `<div>${button}${select}</div>`;
+
+  parent.innerHTML = content;
+
+  // Add listeners
+  const buttonEl = parent.querySelector('button')!;
+  const selectEl = parent.querySelector('select')!;
+
+  buttonEl.addEventListener('click', () => {
+    selectionHandler(selectEl.selectedOptions[0].label);
+  });
 }
