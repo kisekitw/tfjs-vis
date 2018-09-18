@@ -56,14 +56,20 @@ export class SurfaceComponent extends Component<SurfaceProps> {
   }
 
   render() {
-
     const { name, visible, styles } = this.props;
     const finalStyles = {
       ...SurfaceComponent.defaultStyles,
       ...styles,
     };
 
-    const { width, height, maxHeight, maxWidth } = finalStyles;
+    const { width, height, } = finalStyles;
+    let { maxHeight, maxWidth, } = finalStyles;
+    maxHeight = height === SurfaceComponent.defaultStyles.height ?
+      maxHeight : height;
+    maxWidth = width === SurfaceComponent.defaultStyles.width ?
+      maxWidth : width;
+
+    console.log('MW', width, maxWidth);
 
     const surfaceStyle = css({
       display: visible ? 'block' : 'none',
