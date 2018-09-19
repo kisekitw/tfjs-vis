@@ -419,7 +419,6 @@
           const xs = examples.xs.reshape([numExamples, exampleImageSize, exampleImageSize, 1]);
 
           const denseAct = getActivation(xs, model, model.getLayer('dense_Dense1'));
-          denseAct.print();
 
           for (let i = 0; i < numExamples; i++) {
             // Get the activation frot this example
