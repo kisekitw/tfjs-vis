@@ -14,18 +14,12 @@
 # limitations under the License.
 # =============================================================================
 
-# This script deploys demose to GCP so they can be statically hosted.
+# This script deploys demos to GCP so they can be statically hosted.
 #
 # The script can either be used without arguments, which deploys all demos:
 # ./deploy.sh
 # Or you can pass a single argument specifying a single demo to deploy:
-# ./deploy.sh mnist
-#
-# This script assumes that a directory in this repo corresponds to an example.
-#
-# Example directories should have:
-#  - package.json
-#  - `yarn build` script which generates a dist/ folder in the example directory.
+# ./deploy.sh demos/mnist
 
 cd demos
 yarn
@@ -36,8 +30,8 @@ if [ -z "$1" ]
 else
   EXAMPLES=$1
   if [ ! -d "$EXAMPLES" ]; then
-    echo "Error: Could not find example $1"
-    echo "Make sure the first argument to this script matches the example dir"
+    echo "Error: Could not find demo $1"
+    echo "Make sure the first argument to this script matches the demo dir"
     exit 1
   fi
 fi
