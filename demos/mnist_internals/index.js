@@ -60,7 +60,8 @@ async function showExamples(drawArea, numExamples) {
     drawPromises.push(drawPromise);
   }
 
-  await Promise.all(drawPromises).then(() => tf.dispose(tensorsToDispose));
+  await Promise.all(drawPromises);
+  tf.dispose(tensorsToDispose);
 }
 
 function setupListeners() {

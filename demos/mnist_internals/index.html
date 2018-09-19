@@ -210,10 +210,10 @@
         // Render a tensor as an image on canvas object. We will render the
         // activations from the convolutional layers.
         async function renderImage(container, tensor, imageOpts) {
-          const resized = tf.tidy(() => {
-            return tf.image.resizeNearestNeighbor(tensor,
-              [imageOpts.height, imageOpts.width]).clipByValue(0.0, 1.0);
-          });
+          const resized = tf.tidy(() =>
+            tf.image.resizeNearestNeighbor(tensor,
+              [imageOpts.height, imageOpts.width]).clipByValue(0.0, 1.0)
+          );
 
           const canvas = container.querySelector('canvas') || document.createElement('canvas');
           canvas.width = imageOpts.width;
@@ -286,16 +286,13 @@
 
           const filterActivations = activations.map((activation, i) => {
             // activation has shape [activationImageSize, activationImageSize, i];
-            const unpackedActivations = Array(numFilters).fill(0).map((_, i) => {
-              return tf.tidy(() => activation.slice(
-                [0, 0, i], [activationImageSize, activationImageSize, 1]
-              ));
-            });
+            const unpackedActivations = Array(numFilters).fill(0).map((_, i) =>
+              activation.slice([0, 0, i], [activationImageSize, activationImageSize, 1])
+            );
 
             // prepend the input image
             const inputExample = tf.tidy(() =>
-              xs.slice([i], [1])
-                .reshape([exampleImageSize, exampleImageSize, 1]));
+              xs.slice([i], [1]).reshape([exampleImageSize, exampleImageSize, 1]));
 
             unpackedActivations.unshift(inputExample);
             return unpackedActivations;
@@ -417,13 +414,11 @@
           const drawArea = surface.drawArea;
           drawArea.innerHTML = '';
 
-          console.log(model.getLayer('dense_Dense1'))
           const exampleImageSize = 28;
           const numExamples = examples.xs.shape[0];
           const xs = examples.xs.reshape([numExamples, exampleImageSize, exampleImageSize, 1]);
 
           const denseAct = getActivation(xs, model, model.getLayer('dense_Dense1'));
-          console.log("dense activation", denseAct);
           denseAct.print();
 
           for (let i = 0; i < numExamples; i++) {
@@ -433,7 +428,6 @@
 
             // Get the individual example image
             const imageTensor = xs.slice([i], [1]).reshape([exampleImageSize, exampleImageSize, 1]);
-            console.log(imageTensor)
             // Make a div to render the image and bar chart into
             const container = document.createElement('div');
             container.innerHTML = '<span class="image"></span><span class="chart"></span>';

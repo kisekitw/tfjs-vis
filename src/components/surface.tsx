@@ -69,8 +69,6 @@ export class SurfaceComponent extends Component<SurfaceProps> {
     maxWidth = width === SurfaceComponent.defaultStyles.width ?
       maxWidth : width;
 
-    console.log('MW', width, maxWidth);
-
     const surfaceStyle = css({
       display: visible ? 'block' : 'none',
       backgroundColor: 'white',
