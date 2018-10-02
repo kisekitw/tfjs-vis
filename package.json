@@ -13,6 +13,7 @@
     "build": "yarn lint && tsc && NODE_ENV=production webpack",
     "lint": "tslint -p . -t verbose",
     "test": "yarn lint && karma start",
+    "test-travis": "karma start --singleRun --reporters='dots,karma-typescript,BrowserStack' --hostname='bs-local.com'",
     "build-npm": "./scripts/build-npm.sh"
   },
   "dependencies": {
