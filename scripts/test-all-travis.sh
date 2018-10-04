@@ -18,10 +18,9 @@ set -e
 
 # Run the first karma separately so it can download the BrowserStack binary
 # without conflicting with others.
-yarn test-travis --browsers=bs_safari_mac
+yarn test-travis --browsers=bs_chrome_mac
 
 # Run the rest of the karma tests in parallel. These runs will reuse the
 # already downloaded binary.
 npm-run-all -p -c --aggregate-output \
-  "test-travis --browsers=bs_firefox_mac" \
-  "test-travis --browsers=bs_chrome_mac"
+  "test-travis --browsers=bs_firefox_mac"
