@@ -102,10 +102,10 @@ export function visor(): Visor {
     toggle: () => visorComponentInstance.toggle(),
     toggleFullScreen: () => visorComponentInstance.toggleFullScreen(),
     bindKeys: () => {
-      throw new Error('Not yet implemented');
+      visorComponentInstance.bindKeys();
     },
     unbindKeys: () => {
-      throw new Error('Not yet implemented');
+      visorComponentInstance.unbindKeys();
     },
     setActiveTab: (tabName: string) => {
       const tabs = visorComponentInstance.state.tabs;

@@ -172,6 +172,14 @@ Toggles the fullscreen mode of the visor.
 
 Set the currently active tab. tabName must be the name of an existing tab.
 
+#### visor().unbindKeys() => void;
+
+Removes the default keyboard handlers that control visor visibility.
+
+#### visor().bindKeys() => void;
+
+Restores the default keyboard handlers that control visor visiblity.
+
 ### Surface
 
 A surface is the object returned by a call to visor().surface(...). It returns

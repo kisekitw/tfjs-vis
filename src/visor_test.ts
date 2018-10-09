@@ -225,4 +225,50 @@ describe('Visor Singleton', () => {
       visorInstance.setActiveTab('not present');
     }).toThrow();
   });
+
+  it('unbinds keyboard handler', () => {
+    const visorInstance = visor();
+
+    const BACKTICK_KEY = 192;
+    const event = document.createEvent('Event');
+    event.initEvent('keydown', true, true);
+    // @ts-ignore
+    event['keyCode'] = BACKTICK_KEY;
+
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(false);
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(true);
+
+    // Unbind keys
+    visorInstance.unbindKeys();
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(true);
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(true);
+  });
+
+  it('rebinds keyboard handler', () => {
+    const visorInstance = visor();
+
+    const BACKTICK_KEY = 192;
+    const event = document.createEvent('Event');
+    event.initEvent('keydown', true, true);
+    // @ts-ignore
+    event['keyCode'] = BACKTICK_KEY;
+
+    // Unbind keys
+    visorInstance.unbindKeys();
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(true);
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(true);
+
+    // rebind keys
+    visorInstance.bindKeys();
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(false);
+    document.dispatchEvent(event);
+    expect(visorInstance.isOpen()).toBe(true);
+  });
 });
