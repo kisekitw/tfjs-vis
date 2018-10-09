@@ -187,4 +187,42 @@ describe('Visor Singleton', () => {
     expect(document.querySelector('.visor')!.getAttribute('data-isfullscreen'))
         .toBeFalsy();
   });
+
+  it('sets the active tab', async () => {
+    let tabs;
+    const visorInstance = visor();
+
+    visorInstance.surface({name: 'surface 1', tab: 'tab 1'});
+    visorInstance.surface({name: 'surface 2', tab: 'tab 2'});
+    visorInstance.surface({name: 'surface 2', tab: 'tab 3'});
+
+    tabs = document.querySelectorAll('.tf-tab');
+    expect(tabs[2].getAttribute('data-isactive')).toEqual('true');
+
+    visorInstance.setActiveTab('tab 2');
+    await tick();
+    tabs = document.querySelectorAll('.tf-tab');
+    expect(tabs[1].getAttribute('data-isactive')).toEqual('true');
+
+    visorInstance.setActiveTab('tab 1');
+    await tick();
+    tabs = document.querySelectorAll('.tf-tab');
+    expect(tabs[0].getAttribute('data-isactive')).toEqual('true');
+
+    visorInstance.setActiveTab('tab 3');
+    await tick();
+    tabs = document.querySelectorAll('.tf-tab');
+    expect(tabs[2].getAttribute('data-isactive')).toEqual('true');
+  });
+
+  it('throws error if tab does not exist', () => {
+    const visorInstance = visor();
+
+    visorInstance.surface({name: 'surface 1', tab: 'tab 1'});
+    visorInstance.surface({name: 'surface 2', tab: 'tab 2'});
+
+    expect(() => {
+      visorInstance.setActiveTab('not present');
+    }).toThrow();
+  });
 });

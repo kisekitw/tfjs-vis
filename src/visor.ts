@@ -107,6 +107,13 @@ export function visor(): Visor {
     unbindKeys: () => {
       throw new Error('Not yet implemented');
     },
+    setActiveTab: (tabName: string) => {
+      const tabs = visorComponentInstance.state.tabs;
+      if (!tabs.has(tabName)) {
+        throw new Error(`Tab '${tabName}' does not exist`);
+      }
+      visorComponentInstance.setState({activeTab: tabName});
+    }
   };
 
   return visorSingleton;
