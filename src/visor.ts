@@ -101,12 +101,8 @@ export function visor(): Visor {
     open: () => visorComponentInstance.open(),
     toggle: () => visorComponentInstance.toggle(),
     toggleFullScreen: () => visorComponentInstance.toggleFullScreen(),
-    bindKeys: () => {
-      visorComponentInstance.bindKeys();
-    },
-    unbindKeys: () => {
-      visorComponentInstance.unbindKeys();
-    },
+    bindKeys: () => visorComponentInstance.bindKeys(),
+    unbindKeys: () => visorComponentInstance.unbindKeys(),
     setActiveTab: (tabName: string) => {
       const tabs = visorComponentInstance.state.tabs;
       if (!tabs.has(tabName)) {
