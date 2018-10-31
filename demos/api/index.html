@@ -53,7 +53,8 @@
 
     <section>
       <p>
-        tfjs-vis is a small set of visualization utilities to make it easier to understand what is going on with your tfjs models.
+        tfjs-vis is a small set of visualization utilities to make it easier to understand what is going on with your
+        tfjs models.
         It is designed in a way to work along side regular web apps. This page is a testbed for the api.
       </p>
       <script class='show-script' type="module">
@@ -111,7 +112,8 @@
       </p>
 
       <p>
-        This is also true for any render.* function, to re-render or update just call the function with new data and the same container.
+        This is also true for any render.* function, to re-render or update just call the function with new data and
+        the same container.
       </p>
 
       <div id='barchart-multi'></div>
@@ -223,6 +225,52 @@
           // Render to page
           const container = document.getElementById('linechart-cont');
           tfvis.render.linechart(data, container);
+        }
+      </script>
+
+      <h4>Zoom to fit linechart</h4>
+
+      <div id='zoomed-linechart-cont'></div>
+      <script class='show-script'>
+        {
+          const series1 = Array(100).fill(0)
+            .map(y => Math.random() * 100 + 50)
+            .map((y, x) => ({ x, y, }));
+
+          const data = { values: [series1] }
+
+          // Render to visor
+          const surface = tfvis.visor().surface({ name: 'Zoomed Line Chart', tab: 'Charts' });
+          tfvis.render.linechart(data, surface, { zoomToFit: true });
+
+          // Render to page
+          const container = document.getElementById('zoomed-linechart-cont');
+          tfvis.render.linechart(data, container, { zoomToFit: true });
+        }
+      </script>
+
+      <h4>Truncated linechart: Custom y axis domain</h4>
+      <div id='truncated-linechart-cont'></div>
+
+      <script class='show-script'>
+        {
+          const series1 = Array(100).fill(0)
+            .map(y => Math.random() * 100 + 50)
+            .map((y, x) => ({ x, y, }));
+
+          const series2 = Array(100).fill(0)
+            .map(y => Math.random() * 100 + 50)
+            .map((y, x) => ({ x, y, }));
+
+          const data = { values: [series1, series2] }
+
+          // Render to visor
+          const surface = tfvis.visor().surface({ name: 'truncated Line Chart', tab: 'Charts' });
+          tfvis.render.linechart(data, surface, { yAxisDomain: [80, 120] });
+
+          // Render to page
+          const container = document.getElementById('truncated-linechart-cont');
+          tfvis.render.linechart(data, container, { yAxisDomain: [80, 120] });
         }
       </script>
 

@@ -168,6 +168,8 @@ export interface VisOptions {
   yLabel?: string;
   xType?: 'quantitative'|'ordinal'|'nominal';
   yType?: 'quantitative'|'ordinal'|'nominal';
+  yAxisDomain?: [number, number];
+  zoomToFit?: boolean;
 }
 
 /**
