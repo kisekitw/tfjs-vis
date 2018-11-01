@@ -42,6 +42,11 @@ import {getDrawArea} from './render_utils';
  * @param opts.height height of chart in px
  * @param opts.xLabel label for x axis
  * @param opts.yLabel label for y axis
+ * @param opts.zoomToFit a boolean indicating whether to allow non-zero
+ * baselines setting this to true allows the line chart to take up more room in
+ * the plot.
+ * @param opts.yAxisDomain array of two numbers indicating the domain of the y
+ * axis. This is overriden by zoomToFit
  */
 export async function renderLinechart(
     data: {values: Point2D[][]|Point2D[], series?: string[]},
