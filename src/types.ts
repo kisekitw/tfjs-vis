@@ -168,6 +168,12 @@ export interface VisOptions {
   yLabel?: string;
   xType?: 'quantitative'|'ordinal'|'nominal';
   yType?: 'quantitative'|'ordinal'|'nominal';
+}
+
+/**
+ * Options for XY plots
+ */
+export interface XYPlotOptions extends VisOptions {
   yAxisDomain?: [number, number];
   zoomToFit?: boolean;
 }

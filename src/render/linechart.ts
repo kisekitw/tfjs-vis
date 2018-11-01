@@ -17,7 +17,7 @@
 
 import embed, {Mode, VisualizationSpec} from 'vega-embed';
 
-import {Drawable, Point2D, VisOptions} from '../types';
+import {Drawable, Point2D, XYPlotOptions} from '../types';
 
 import {getDrawArea} from './render_utils';
 
@@ -45,7 +45,7 @@ import {getDrawArea} from './render_utils';
  */
 export async function renderLinechart(
     data: {values: Point2D[][]|Point2D[], series?: string[]},
-    container: Drawable, opts: VisOptions = {}): Promise<void> {
+    container: Drawable, opts: XYPlotOptions = {}): Promise<void> {
   let inputArray = data.values;
   const _series = data.series == null ? [] : data.series;
 
@@ -89,14 +89,14 @@ export async function renderLinechart(
   };
 
   // tslint:disable-next-line:no-any
-  let clipFilter: any = undefined;
+  let domainFilter: any;
   if (options.zoomToFit) {
     const yScale = {zero: false};
     encodings['y']['scale'] = yScale;
   } else if (options.yAxisDomain != null) {
     const yScale = {domain: options.yAxisDomain};
     encodings['y']['scale'] = yScale;
-    clipFilter = {'filter': {'field': 'y', 'range': options.yAxisDomain}};
+    domainFilter = {'filter': {'field': 'y', 'range': options.yAxisDomain}};
   }
 
   const spec: VisualizationSpec = {
@@ -123,11 +123,11 @@ export async function renderLinechart(
         // easier
         'mark': {'type': 'point'},
         // 'encoding': encodings,
-        // If a custom domain is set, filter out the values that will not fit
-        // we do this on the points and not the line so that the line still
-        // appears clipped for values outside the domain but we can still
-        // operate on an unclipped set of points.
-        'transform': options.yAxisDomain ? [clipFilter] : undefined,
+        // If a custom domain is set, filter out the values that will not
+        // fit we do this on the points and not the line so that the line
+        // still appears clipped for values outside the domain but we can
+        // still operate on an unclipped set of points.
+        'transform': options.yAxisDomain ? [domainFilter] : undefined,
         'selection': {
           'nearestPoint': {
             'type': 'single',
@@ -139,7 +139,7 @@ export async function renderLinechart(
         },
         'encoding': Object.assign({}, encodings, {
           'opacity': {
-            'value': 0.5,
+            'value': 0,
             'condition': {
               'selection': 'nearestPoint',
               'value': 1,
@@ -151,7 +151,7 @@ export async function renderLinechart(
         // Render a tooltip where the selection is
         'transform': [
           {'filter': {'selection': 'nearestPoint'}},
-          clipFilter,
+          domainFilter
         ].filter(Boolean),  // remove undefineds from array
         'mark': {
           'type': 'text',
@@ -183,8 +183,6 @@ export async function renderLinechart(
       },
     ],
   };
-
-  console.log('linechart spec', spec);
 
   await embed(drawArea, spec, embedOpts);
   return Promise.resolve();
