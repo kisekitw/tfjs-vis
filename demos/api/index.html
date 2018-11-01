@@ -304,6 +304,73 @@
         }
       </script>
 
+
+      <h4>Zoom to fit scatter plot</h4>
+      <div id='zoomed-scatterplot-cont'></div>
+
+      <script class='show-script'>
+        {
+          const series1 = Array(100).fill(0)
+            .map(y => Math.random() * 100 + (Math.random() * 50))
+            .map((y, x) => ({ x: x + 50, y: y + 50, }));
+
+          const series2 = Array(100).fill(0)
+            .map(y => Math.random() * 100 + (Math.random() * 150))
+            .map((y, x) => ({ x: x + 50, y: y + 50, }));
+
+
+          const series = ['First', 'Second'];
+          const data = { values: [series1, series2], series }
+
+          // Render to visor
+          const surface = tfvis.visor().surface({ name: 'Zoomed Scatterplot', tab: 'Charts' });
+          tfvis.render.scatterplot(data, surface, { zoomToFit: true });
+
+          // Render to page
+          const container = document.getElementById('zoomed-scatterplot-cont');
+          tfvis.render.scatterplot(data, container, {
+            width: 500,
+            height: 500,
+            zoomToFit: true,
+          });
+        }
+      </script>
+
+      <h4>Custom domain scatter plot</h4>
+      <div id='customdomain-scatterplot-cont'></div>
+
+      <script class='show-script'>
+        {
+          const series1 = Array(100).fill(0)
+            .map(y => Math.random() * 100 + (Math.random() * 50))
+            .map((y, x) => ({ x: x + 50, y: y + 50, }));
+
+          const series2 = Array(100).fill(0)
+            .map(y => Math.random() * 100 + (Math.random() * 150))
+            .map((y, x) => ({ x: x + 50, y: y + 50, }));
+
+
+          const series = ['First', 'Second'];
+          const data = { values: [series1, series2], series }
+
+          // Render to visor
+          const surface = tfvis.visor().surface({ name: 'Custom Domain Scatterplot', tab: 'Charts' });
+          tfvis.render.scatterplot(data, surface, {
+            xAxisDomain: [-20, 200],
+            yAxisDomain: [-50, 125]
+          });
+
+          // Render to page
+          const container = document.getElementById('customdomain-scatterplot-cont');
+          tfvis.render.scatterplot(data, container, {
+            width: 500,
+            height: 500,
+            xAxisDomain: [-20, 200],
+            yAxisDomain: [-50, 125]
+          });
+        }
+      </script>
+
       <hr>
 
       <h3>render.confusionMatrix(data, container, opts)</h3>

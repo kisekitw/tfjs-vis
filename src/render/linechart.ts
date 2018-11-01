@@ -70,6 +70,15 @@ export async function renderLinechart(
     mode: 'vega-lite' as Mode,
   };
 
+  const yScale = (): {}|undefined => {
+    if (options.zoomToFit) {
+      return {'zero': false};
+    } else if (options.yAxisDomain != null) {
+      return {'domain': options.yAxisDomain};
+    }
+    return undefined;
+  };
+
   // tslint:disable-next-line:no-any
   const encodings: any = {
     'x': {
@@ -81,6 +90,7 @@ export async function renderLinechart(
       'field': 'y',
       'type': options.yType,
       'title': options.yLabel,
+      'scale': yScale(),
     },
     'color': {
       'field': 'series',
@@ -90,12 +100,7 @@ export async function renderLinechart(
 
   // tslint:disable-next-line:no-any
   let domainFilter: any;
-  if (options.zoomToFit) {
-    const yScale = {zero: false};
-    encodings['y']['scale'] = yScale;
-  } else if (options.yAxisDomain != null) {
-    const yScale = {domain: options.yAxisDomain};
-    encodings['y']['scale'] = yScale;
+  if (options.yAxisDomain != null) {
     domainFilter = {'filter': {'field': 'y', 'range': options.yAxisDomain}};
   }
 
