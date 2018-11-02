@@ -39,36 +39,80 @@ export async function history(
   // Get the draw surface
   const drawArea = getDrawArea(container);
 
-  // Format Data
-
-  let values: Point2D[][];
-  if (Array.isArray(history)) {
-    values = metrics.map(metric => {
-      const points: Point2D[] = [];
-      history.forEach((log: Logs, x: number) => {
-        if (log[metric] != null) {
-          points.push({x, y: log[metric]});
-        }
-      });
-      return points;
-    });
-  } else {
-    values = metrics.map(metric => {
-      return (history.history[metric] as number[]).map((y, x) => ({x, y}));
-    });
+  // We organize the data from the history object into discrete plot data
+  // objects so that we can group together appropriate metrics into single
+  // multi-series charts.
+  const plots: HistoryPlotData = {};
+  for (const metric of metrics) {
+    if (metric.match('loss')) {
+      const values = getValues(history, metric);
+      initPlot(plots, 'loss');
+      plots['loss'].series.push(metric);
+      plots['loss'].values.push(values);
+    } else if (metric.match('acc')) {
+      const values = getValues(history, metric);
+      initPlot(plots, 'acc');
+      plots['acc'].series.push(metric);
+      plots['acc'].values.push(values);
+    } else {
+      const values = getValues(history, metric);
+      initPlot(plots, metric);
+      plots[metric].series.push(metric);
+      plots[metric].values.push(values);
+    }
   }
 
-  // Remove collections that are empty because the logs object doesn't have
-  // an entry for that metric.
-  values = values.filter(v => v.length > 0);
+  // console.log('plots', plots);
 
-  // Dispatch to render func
-  if (values.length > 0) {
-    const series = metrics;
-    return renderLinechart({values, series}, drawArea, {
+  // Render each plot specified above to a new subsurface.
+  // A plot may have multiple series.
+  const plotNames = Object.keys(plots);
+  const renderPromises = [];
+  for (const name of plotNames) {
+    const subContainer = subSurface(drawArea, name);
+    const series = plots[name].series;
+    const values = plots[name].values;
+    const done = renderLinechart({values, series}, subContainer, {
       xLabel: 'Iteration',
       yLabel: 'Value',
     });
+    renderPromises.push(done);
+  }
+  await Promise.all(renderPromises);
+}
+
+type HistoryLike = Logs[]|{
+  history: {
+    [key: string]: number[],
+  }
+};
+
+interface HistoryPlotData {
+  [name: string]: {
+    series: string[],
+    values: Point2D[][],
+  };
+}
+
+function initPlot(plot: HistoryPlotData, name: string) {
+  if (plot[name] == null) {
+    plot[name] = {series: [], values: []};
+  }
+}
+
+function getValues(history: HistoryLike, metric: string): Point2D[] {
+  if (Array.isArray(history)) {
+    console.log('getValues', metric, history);
+    const points: Point2D[] = [];
+    history.forEach((log: Logs, x: number) => {
+      if (log[metric] != null) {
+        const iteration = log._iteration != null ? log._iteration : x;
+        points.push({x: iteration, y: log[metric]});
+      }
+    });
+    return points;
+  } else {
+    return (history.history[metric] as number[]).map((y, x) => ({x, y}));
   }
 }
 
@@ -86,25 +130,25 @@ export function fitCallbacks(
   const callbackNames = ['onEpochEnd', 'onBatchEnd'];
   const drawArea = getDrawArea(container);
 
+  // Create an array to store logs for each callback.
   for (const callbackName of callbackNames) {
-    for (const metric of metrics) {
-      const accumulatorName = getAccumulatorName(metric, callbackName);
-      accumulators[accumulatorName] = [];
-    }
+    const accumulatorName = getAccumulatorName(callbackName);
+    accumulators[accumulatorName] = [];
   }
 
   function makeCallbackFor(callbackName: string) {
-    return async (_: number, log: Logs) => {
+    return async (iteration: number, log: Logs) => {
+      console.log(callbackName, iteration, log)
+      // We want to store all the metrics for a given callback in the same array
+      const accumulatorName = getAccumulatorName(callbackName);
+      const metricLog = accumulators[accumulatorName];
       for (const metric of metrics) {
-        const accumulatorName = getAccumulatorName(metric, callbackName);
-        const metricLog = accumulators[accumulatorName];
-        metricLog.push({[accumulatorName]: log[metric]});
-
-        const subContainer = subSurface(drawArea, accumulatorName);
-        history(subContainer, metricLog, [accumulatorName]);
-
-        await nextFrame();
+        metricLog.push({[metric]: log[metric], _iteration: iteration});
       }
+      const subContainer =
+          subSurface(drawArea, accumulatorName, {title: accumulatorName});
+      history(subContainer, metricLog, metrics);
+      await nextFrame();
     };
   }
 
@@ -115,15 +159,10 @@ export function fitCallbacks(
   return callbacks;
 }
 
-type HistoryLike = Logs[]|{
-  history: {
-    [key: string]: number[],
-  }
-};
 interface FitCallbackHandlers {
   [key: string]: (iteration: number, log: Logs) => Promise<void>;
 }
 
-function getAccumulatorName(metric: string, callbackName: string): string {
-  return `${metric}—${callbackName}`;
+function getAccumulatorName(callbackName: string): string {
+  return `${callbackName}`;
 }
