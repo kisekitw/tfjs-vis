@@ -45,24 +45,22 @@ export async function history(
   const plots: HistoryPlotData = {};
   for (const metric of metrics) {
     if (metric.match('loss')) {
-      const values = getValues(history, metric);
+      const values = getValues(history, metric, metrics.indexOf(metric));
       initPlot(plots, 'loss');
       plots['loss'].series.push(metric);
       plots['loss'].values.push(values);
     } else if (metric.match('acc')) {
-      const values = getValues(history, metric);
+      const values = getValues(history, metric, metrics.indexOf(metric));
       initPlot(plots, 'acc');
       plots['acc'].series.push(metric);
       plots['acc'].values.push(values);
     } else {
-      const values = getValues(history, metric);
+      const values = getValues(history, metric, metrics.indexOf(metric));
       initPlot(plots, metric);
       plots[metric].series.push(metric);
       plots[metric].values.push(values);
     }
   }
-
-  // console.log('plots', plots);
 
   // Render each plot specified above to a new subsurface.
   // A plot may have multiple series.
@@ -72,6 +70,7 @@ export async function history(
     const subContainer = subSurface(drawArea, name);
     const series = plots[name].series;
     const values = plots[name].values;
+
     const done = renderLinechart({values, series}, subContainer, {
       xLabel: 'Iteration',
       yLabel: 'Value',
@@ -81,7 +80,7 @@ export async function history(
   await Promise.all(renderPromises);
 }
 
-type HistoryLike = Logs[]|{
+type HistoryLike = Logs[]|Logs[][]|{
   history: {
     [key: string]: number[],
   }
@@ -100,16 +99,28 @@ function initPlot(plot: HistoryPlotData, name: string) {
   }
 }
 
-function getValues(history: HistoryLike, metric: string): Point2D[] {
+/*
+ * Extracts a list of Point2D's suitable for plotting from a HistoryLike for
+ * a single metric.
+ * @param history a HistoryLike object
+ * @param metric the metric to extract from the logs
+ * @param metricIndex this is needed because the historylike can be a nested
+ * list of logs for multiple metrics, this index lets us extract the correct
+ * list.
+ */
+function getValues(
+    history: HistoryLike, metric: string, metricIndex: number): Point2D[] {
   if (Array.isArray(history)) {
-    console.log('getValues', metric, history);
+    // If we were passed a nested array we want to get the correct list
+    // for this given metric, metrix index gives us this list.
+    const metricHistory =
+        (Array.isArray(history[0]) ? history[metricIndex] : history) as Logs[];
     const points: Point2D[] = [];
-    history.forEach((log: Logs, x: number) => {
-      if (log[metric] != null) {
-        const iteration = log._iteration != null ? log._iteration : x;
-        points.push({x: iteration, y: log[metric]});
-      }
-    });
+
+    for (let i = 0; i < metricHistory.length; i++) {
+      const log = metricHistory[i];
+      points.push({x: i, y: log[metric]});
+    }
     return points;
   } else {
     return (history.history[metric] as number[]).map((y, x) => ({x, y}));
@@ -126,28 +137,38 @@ function getValues(history: HistoryLike, metric: string): Point2D[] {
  */
 export function fitCallbacks(
     container: Drawable, metrics: string[]): FitCallbackHandlers {
-  const accumulators: {[key: string]: Logs[]} = {};
+  const accumulators: FitCallbackLogs = {};
   const callbackNames = ['onEpochEnd', 'onBatchEnd'];
   const drawArea = getDrawArea(container);
 
-  // Create an array to store logs for each callback.
-  for (const callbackName of callbackNames) {
-    const accumulatorName = getAccumulatorName(callbackName);
-    accumulators[accumulatorName] = [];
-  }
-
   function makeCallbackFor(callbackName: string) {
-    return async (iteration: number, log: Logs) => {
-      console.log(callbackName, iteration, log)
-      // We want to store all the metrics for a given callback in the same array
-      const accumulatorName = getAccumulatorName(callbackName);
-      const metricLog = accumulators[accumulatorName];
+    return async (_: number, log: Logs) => {
+      // Because of how the _ (iteration) numbers are given in the layers api
+      // we have to store each metric for each callback in different arrays else
+      // we cannot get accurate batch numbers for onBatchEnd.
+
+      // However at render time we want to combine metrics for a given callback.
+      // So we make a nested list of metrics the first level are arrays for each
+      // callback, the second level contains arrays (of logs) for each metric
+      // within that callback.
+
+      const metricLogs: Logs[][] = [];
+      const presentMetrics: string[] = [];
       for (const metric of metrics) {
-        metricLog.push({[metric]: log[metric], _iteration: iteration});
+        // not all logs have all kinds of metrics.
+        if (log[metric] != null) {
+          presentMetrics.push(metric);
+
+          const accumulator =
+              getAccumulator(accumulators, callbackName, metric);
+          accumulator.push({[metric]: log[metric]});
+          metricLogs.push(accumulator);
+        }
       }
+
       const subContainer =
-          subSurface(drawArea, accumulatorName, {title: accumulatorName});
-      history(subContainer, metricLog, metrics);
+          subSurface(drawArea, callbackName, {title: callbackName});
+      history(subContainer, metricLogs, presentMetrics);
       await nextFrame();
     };
   }
@@ -163,6 +184,19 @@ interface FitCallbackHandlers {
   [key: string]: (iteration: number, log: Logs) => Promise<void>;
 }
 
-function getAccumulatorName(callbackName: string): string {
-  return `${callbackName}`;
+interface FitCallbackLogs {
+  [callback: string]: {
+    [metric: string]: Logs[],
+  };
+}
+
+function getAccumulator(
+    accumulators: FitCallbackLogs, callback: string, metric: string): Logs[] {
+  if (accumulators[callback] == null) {
+    accumulators[callback] = {};
+  }
+  if (accumulators[callback][metric] == null) {
+    accumulators[callback][metric] = [];
+  }
+  return accumulators[callback][metric];
 }
