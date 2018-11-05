@@ -33,10 +33,10 @@ describe('fitCallbacks', () => {
   it('onEpochEnd callback can render logs', async () => {
     const container = {name: 'Test'};
     const callbacks =
-        fitCallbacks(container, ['loss', 'val-loss', 'acc', 'val-acc']);
+        fitCallbacks(container, ['loss', 'val_loss', 'acc', 'val_acc']);
 
-    const l1 = {loss: 0.5, 'val-loss': 0.7};
-    const l2 = {loss: 0.2, acc: 0.6, 'val-loss': 0.5, 'val-acc': 0.3};
+    const l1 = {loss: 0.5, 'val_loss': 0.7};
+    const l2 = {loss: 0.2, acc: 0.6, 'val_loss': 0.5, 'val_acc': 0.3};
 
     await callbacks.onEpochEnd(0, l1);
     expect(document.querySelectorAll('.vega-embed').length).toBe(1);
