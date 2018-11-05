@@ -19,7 +19,7 @@ import {Logs} from '@tensorflow/tfjs-layers/dist/logs';
 
 import {renderLinechart} from '../render/linechart';
 import {getDrawArea, nextFrame} from '../render/render_utils';
-import {Drawable, Point2D} from '../types';
+import {Drawable, Point2D, XYPlotOptions} from '../types';
 import {subSurface} from '../util/dom';
 
 /**
@@ -70,11 +70,18 @@ export async function history(
     const subContainer = subSurface(drawArea, name);
     const series = plots[name].series;
     const values = plots[name].values;
-
-    const done = renderLinechart({values, series}, subContainer, {
+    const options: XYPlotOptions = {
       xLabel: 'Iteration',
       yLabel: 'Value',
-    });
+    };
+
+    if (series.every(seriesName => Boolean(seriesName.match('acc')))) {
+      // Set a domain of 0-1 if all the series in this plot are related to
+      // accuracy.
+      options.yAxisDomain = [0, 1];
+    }
+
+    const done = renderLinechart({values, series}, subContainer, options);
     renderPromises.push(done);
   }
   await Promise.all(renderPromises);
@@ -145,12 +152,12 @@ export function fitCallbacks(
     return async (_: number, log: Logs) => {
       // Because of how the _ (iteration) numbers are given in the layers api
       // we have to store each metric for each callback in different arrays else
-      // we cannot get accurate batch numbers for onBatchEnd.
+      // we cannot get accurate 'global' batch numbers for onBatchEnd.
 
-      // However at render time we want to combine metrics for a given callback.
-      // So we make a nested list of metrics the first level are arrays for each
-      // callback, the second level contains arrays (of logs) for each metric
-      // within that callback.
+      // However at render time we want to be able to combine metrics for a
+      // given callback. So here we make a nested list of metrics, the first
+      // level are arrays for each callback, the second level contains arrays
+      // (of logs) for each metric within that callback.
 
       const metricLogs: Logs[][] = [];
       const presentMetrics: string[] = [];
