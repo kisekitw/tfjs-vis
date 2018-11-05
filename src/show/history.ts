@@ -44,21 +44,21 @@ export async function history(
   // multi-series charts.
   const plots: HistoryPlotData = {};
   for (const metric of metrics) {
-    if (metric.match('loss')) {
-      const values = getValues(history, metric, metrics.indexOf(metric));
-      initPlot(plots, 'loss');
-      plots['loss'].series.push(metric);
-      plots['loss'].values.push(values);
-    } else if (metric.match('acc')) {
-      const values = getValues(history, metric, metrics.indexOf(metric));
-      initPlot(plots, 'acc');
-      plots['acc'].series.push(metric);
-      plots['acc'].values.push(values);
-    } else {
+    if (!(/val_/.test(metric))) {
+      // Non validation metric
       const values = getValues(history, metric, metrics.indexOf(metric));
       initPlot(plots, metric);
       plots[metric].series.push(metric);
       plots[metric].values.push(values);
+    } else {
+      // Validation metrics are grouped with their equivalent non validation
+      // metrics. Note that the corresponding non validation metric may not
+      // actually be included but we still want to use it as a plot name.
+      const nonValidationMetric = metric.replace('val_', '');
+      initPlot(plots, nonValidationMetric);
+      const values = getValues(history, metric, metrics.indexOf(metric));
+      plots[nonValidationMetric].series.push(metric);
+      plots[nonValidationMetric].values.push(values);
     }
   }
 
