@@ -36,10 +36,15 @@ import {subSurface} from '../util/dom';
  *  for render.linechart for details. Notably for 'accuracy' related plots
  *  the domain of the yAxis will always by 0-1, i.e. zoomToFit and yAxisDomain
  *  options are ignored.
+ * @param opts.zoomToFitAccuracy a boolean controlling whether to 'zoomToFit'
+ *  accuracy plots as well. Constraining the y axis domain of an accuracy plot
+ *  to exactly 0-1 is desireable most of the time. However there may be cases,
+ *  such as when doing transfer learning, where more resolution is desired. Set
+ *  zoomToFitAccuracy to true to turn on zoomToFit for accuracy plots.
  */
 export async function history(
     container: Drawable, history: HistoryLike, metrics: string[],
-    opts: XYPlotOptions = {}): Promise<void> {
+    opts: HistoryOptions = {}): Promise<void> {
   // Get the draw surface
   const drawArea = getDrawArea(container);
 
@@ -69,7 +74,7 @@ export async function history(
   // Render each plot specified above to a new subsurface.
   // A plot may have multiple series.
   const plotNames = Object.keys(plots);
-  const options: XYPlotOptions =
+  const options =
       Object.assign({}, {xLabel: 'Iteration', yLabel: 'Value'}, opts);
 
   const renderPromises = [];
@@ -80,15 +85,23 @@ export async function history(
 
     if (series.every(seriesName => Boolean(seriesName.match('acc')))) {
       // Set a domain of 0-1 if all the series in this plot are related to
-      // accuracy.
-      options.yAxisDomain = [0, 1];
-      delete options.zoomToFit;
+      // accuracy. Can be overridden by setting zoomToFitAccuracy to true.
+      if (options.zoomToFitAccuracy) {
+        options.zoomToFit = true;
+      } else {
+        options.yAxisDomain = [0, 1];
+        delete options.zoomToFit;
+      }
     }
 
     const done = renderLinechart({values, series}, subContainer, options);
     renderPromises.push(done);
   }
   await Promise.all(renderPromises);
+}
+
+interface HistoryOptions extends XYPlotOptions {
+  zoomToFitAccuracy?: boolean;
 }
 
 type HistoryLike = Logs[]|Logs[][]|{
@@ -149,6 +162,11 @@ function getValues(
  *  for render.linechart for details. Notably for 'accuracy' related plots
  *  the domain of the yAxis will always by 0-1, i.e. zoomToFit and yAxisDomain
  *  options are ignored.
+ * @param opts.zoomToFitAccuracy a boolean controlling whether to 'zoomToFit'
+ *  accuracy plots as well. Constraining the y axis domain of an accuracy plot
+ *  to exactly 0-1 is desireable most of the time. However there may be cases,
+ *  such as when doing transfer learning, where more resolution is desired. Set
+ *  zoomToFitAccuracy to true to turn on zoomToFit for accuracy plots.
  * @param opts.callbacks Array of strings with callback names. Valid options
  *  are 'onEpochEnd' and 'onBatchEnd'. Defaults to ['onEpochEnd', 'onBatchEnd'].
  */
@@ -217,7 +235,7 @@ interface FitCallbackLogs {
   };
 }
 
-interface FitCallbackOptions extends XYPlotOptions {
+interface FitCallbackOptions extends HistoryOptions {
   callbacks?: string[];
 }
 
