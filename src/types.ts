@@ -203,6 +203,12 @@ export interface HistogramStats {
 export type TypedArray = Int8Array|Uint8Array|Int16Array|Uint16Array|Int32Array|
     Uint32Array|Uint8ClampedArray|Float32Array|Float64Array;
 
+export interface HeatmapData {
+  values: number[][];
+  xLabels?: string[];
+  yLabels?: string[];
+}
+
 export interface ConfusionMatrixData {
   values: number[][];
   labels?: string[];
