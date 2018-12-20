@@ -16,7 +16,7 @@
  */
 
 import embed, {Mode, VisualizationSpec} from 'vega-embed';
-import {ExtendedLayerSpec} from 'vega-lite/src/spec';
+type ExtendedLayerSpec = import('vega-lite').spec.ExtendedLayerSpec;
 
 import {Drawable, HeatmapData, VisOptions,} from '../types';
 
@@ -68,8 +68,8 @@ export async function renderHeatmap(
 
   for (let i = 0; i < inputArray.length; i++) {
     for (let j = 0; j < inputArray[i].length; j++) {
-      const x = xLabels ? xLabels[i] : `${i}`;
-      const y = yLabels ? yLabels[j] : `${j}`;
+      const x = xLabels ? xLabels[i] : i;
+      const y = yLabels ? yLabels[j] : j;
       const count = inputArray[i][j];
       values.push({
         x,
@@ -180,8 +180,8 @@ const defaultOpts = {
 };
 
 interface MatrixEntry {
-  x: string;
-  y: string;
+  x: string|number;
+  y: string|number;
   count: number;
 }
 

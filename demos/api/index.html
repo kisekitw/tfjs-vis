@@ -393,7 +393,7 @@
             const row = []
             for (let j = 0; j < cols; j++) {
               row.push(Math.round(Math.random() * 50));
-          }
+            }
             values.push(row);
           }
           const data = { values: values };
@@ -507,11 +507,17 @@
 
       <script class='show-script'>
         {
-          const data = {
-            values: [[4, 2, 8, 20], [1, 7, 2, 10], [3, 3, 20, 13]],
-            xLabels: ['cheese', 'pig', 'font'],
-            yLabels: ['speed', 'smoothness', 'dexterity', 'mana'],
+          const rows = 50;
+          const cols = 20;
+          const values = [];
+          for (let i = 0; i < rows; i++) {
+            const row = []
+            for (let j = 0; j < cols; j++) {
+              row.push(Math.random() * 100);
+            }
+            values.push(row);
           }
+          const data = { values: values };
 
           // Render to visor
           const surface = tfvis.visor().surface({ name: 'Heatmap', tab: 'Charts' });
@@ -520,6 +526,58 @@
           // Render to page
           const container = document.getElementById('heatmap-cont');
           tfvis.render.heatmap(data, container, { width: 500, height: 500 });
+        }
+      </script>
+
+      <p>
+        We can also pass in custom labels
+      </p>
+      <div id='heatmap-cont2'></div>
+
+      <script class='show-script'>
+        {
+          const data = {
+            values: [[4, 2, 8, 20], [1, 7, 2, 10], [3, 3, 20, 13]],
+            xLabels: ['cheese', 'pig', 'font'],
+            yLabels: ['speed', 'smoothness', 'dexterity', 'mana'],
+          }
+
+          // Render to visor
+          const surface = tfvis.visor().surface({ name: 'Heatmap w Custom Labels', tab: 'Charts' });
+          tfvis.render.heatmap(data, surface);
+
+          // Render to page
+          const container = document.getElementById('heatmap-cont2');
+          tfvis.render.heatmap(data, container, { width: 500, height: 500 });
+        }
+      </script>
+
+      <p>
+        Alternate color maps are also supported.
+      </p>
+      <div id='heatmap-cont3'></div>
+
+      <script class='show-script'>
+        {
+          const data = {
+            values: [[4, 2, 8, 20], [1, 7, 2, 10], [3, 3, 20, 13]],
+            xLabels: ['cheese', 'pig', 'font'],
+            yLabels: ['speed', 'smoothness', 'dexterity', 'mana'],
+          }
+
+          // Render to visor
+          const surface = tfvis.visor().surface({ name: 'Heatmap w Custom Colormap', tab: 'Charts' });
+          tfvis.render.heatmap(data, surface, {
+            colorMap: 'greyscale',
+          });
+
+          // Render to page
+          const container = document.getElementById('heatmap-cont3');
+          tfvis.render.heatmap(data, container, {
+            colorMap: 'greyscale',
+            width: 500,
+            height: 500
+          });
         }
       </script>
 
