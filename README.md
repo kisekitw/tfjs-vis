@@ -445,8 +445,8 @@ Renders a confusion matrix
   ```
 * @param container An `HTMLElement` or `Surface` in which to draw the chart
 * @param opts optional parameters
-* @param opts.shadeDiagonal boolean that controls whether or not to color cells
-* on the diagonal. Defaults to false
+* @param opts.shadeDiagonal boolean that controls whether or not to color cells on the diagonal. Defaults to false
+* @param opts.showTextOverlay boolean that controls whether or not to render the values of each cell as text. Defaults to true
 * @param opts.width width of chart in px
 * @param opts.height height of chart in px
 * @param opts.fontSize fontSize in pixels for text in the chart
