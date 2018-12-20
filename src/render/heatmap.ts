@@ -21,6 +21,8 @@ type ExtendedLayerSpec = import('vega-lite').spec.ExtendedLayerSpec;
 import {Drawable, HeatmapData, VisOptions,} from '../types';
 
 import {getDrawArea} from './render_utils';
+import {Tensor} from '@tensorflow/tfjs';
+import {assert} from '../util/utils';
 
 /**
  * Renders a heatmap.
@@ -29,7 +31,7 @@ import {getDrawArea} from './render_utils';
  *  and a 'labels' property.
  *  {
  *    // a matrix of numbers
- *    values: number[][],
+ *    values: number[][]|Tensor2d,
  *
  *    // Human readable labels for each class in the matrix. Optional
  *    xLabels?: string[]
@@ -62,20 +64,43 @@ export async function renderHeatmap(
   // Format data for vega spec; an array of objects, one for for each cell
   // in the matrix.
   const values: MatrixEntry[] = [];
-
-  const inputArray = data.values;
   const {xLabels, yLabels} = data;
 
-  for (let i = 0; i < inputArray.length; i++) {
-    for (let j = 0; j < inputArray[i].length; j++) {
-      const x = xLabels ? xLabels[i] : i;
-      const y = yLabels ? yLabels[j] : j;
-      const count = inputArray[i][j];
-      values.push({
-        x,
-        y,
-        count,
-      });
+  if (data.values instanceof Tensor) {
+    // These two branches are very similar but we want to do the test once
+    // rather than on every element access
+    assert(
+        data.values.rank === 2,
+        'Input to renderHeatmap must be a 2d array or Tensor2d');
+
+    // This is a slightly specialized version of TensorBuffer.get, inlining it
+    // avoids the overhead of a function per data element access and is
+    // specialized to only deal with the 2d case.
+    const inputArray = await data.values.data();
+    const shape = data.values.shape;
+    const [numRows, numCols] = shape;
+
+    for (let row = 0; row < numRows; row++) {
+      const x = xLabels ? xLabels[row] : row;
+      for (let col = 0; col < numCols; col++) {
+        const y = yLabels ? yLabels[col] : col;
+
+        const index = (row * numCols) + col;
+        const count = inputArray[index];
+
+        values.push({x, y, count});
+      }
+    }
+  } else {
+    const inputArray = data.values as number[][];
+    for (let row = 0; row < inputArray.length; row++) {
+      const x = xLabels ? xLabels[row] : row;
+      for (let col = 0; col < inputArray[row].length; col++) {
+        const y = yLabels ? yLabels[col] : col;
+        const count = inputArray[row][col];
+
+        values.push({x, y, count});
+      }
     }
   }
 

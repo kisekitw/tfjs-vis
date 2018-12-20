@@ -452,6 +452,39 @@ Renders a confusion matrix
 * @param opts.fontSize fontSize in pixels for text in the chart
 
 
+## render.heatmap(data: {}, container: Surface|HTMLElement, opts: {}): Promise<void>
+
+
+Renders a heatmap.
+
+* @param data Data consists of an object with a 'values' property
+  and a 'labels' property.
+  ```ts
+  {
+    // a matrix of numbers
+    values: number[][]|Tensor2d,
+    // Human readable labels for each class in the matrix. Optional
+    xLabels?: string[]
+    yLabels?: string[]
+  }
+  e.g.
+  {
+    values: [[80, 23], [56, 94]],
+    xLabels: ['dog', 'cat'],
+    yLabels: ['size', 'temperature'],
+  }
+  ```
+* @param container An `HTMLElement` or `Surface` in which to draw the chart
+* @param opts optional parameters
+* @param opts.colorMap which colormap to use. One of viridis|blues|greyscale. Defaults to viridis
+* @param opts.domain a two element array representing a custom output domain
+  for the color scale. Useful if you want to plot multiple heatmaps using
+  the same scale.
+* @param opts.width width of chart in px
+* @param opts.height height of chart in px
+* @param opts.fontSize fontSize in pixels for text in the chart
+
+
 ## Metrics
 
 The `metrics` namespace contains a few utility functions for computing quality metrics

@@ -1,3 +1,5 @@
+import {Tensor2D} from '@tensorflow/tfjs';
+
 /*
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -204,7 +206,7 @@ export type TypedArray = Int8Array|Uint8Array|Int16Array|Uint16Array|Int32Array|
     Uint32Array|Uint8ClampedArray|Float32Array|Float64Array;
 
 export interface HeatmapData {
-  values: number[][];
+  values: number[][]|Tensor2D;
   xLabels?: string[];
   yLabels?: string[];
 }

@@ -15,6 +15,8 @@
  * =============================================================================
  */
 
+import * as tf from '@tensorflow/tfjs';
+
 import {renderHeatmap} from './heatmap';
 
 describe('renderHeatmap', () => {
@@ -34,6 +36,40 @@ describe('renderHeatmap', () => {
     await renderHeatmap(data, container);
 
     expect(document.querySelectorAll('.vega-embed').length).toBe(1);
+  });
+
+  it('renders a chart with a tensor', async () => {
+    const values = tf.tensor2d([[4, 2, 8], [1, 7, 2], [3, 3, 20]]);
+    const data = {
+      values,
+    };
+
+    const container = document.getElementById('container') as HTMLElement;
+    await renderHeatmap(data, container);
+
+    expect(document.querySelectorAll('.vega-embed').length).toBe(1);
+
+    values.dispose();
+  });
+
+  it('throws an exception with a non 2d tensor', async () => {
+    const values = tf.tensor1d([4, 2, 8, 1, 7, 2, 3, 3, 20]);
+    const data = {
+      values,
+    };
+
+    const container = document.getElementById('container') as HTMLElement;
+
+    let threw = false;
+    try {
+      // @ts-ignore — passing in the wrong datatype
+      await renderHeatmap(data, container);
+    } catch (e) {
+      threw = true;
+    } finally {
+      values.dispose();
+    }
+    expect(threw).toBe(true);
   });
 
   it('renders a chart with custom colormap', async () => {

@@ -581,6 +581,33 @@
         }
       </script>
 
+
+      <p>
+        Tensor2D's are also supported
+      </p>
+      <div id='heatmap-cont4'></div>
+
+      <script class='show-script'>
+        {
+          const data = {
+            values: tf.tensor2d([[4, 2, 8, 20], [1, 7, 2, 10], [3, 3, 20, 13]]),
+            xLabels: ['cheese', 'pig', 'font'],
+            yLabels: ['speed', 'smoothness', 'dexterity', 'mana'],
+          }
+
+          // Render to visor
+          const surface = tfvis.visor().surface({ name: 'Heatmap', tab: 'Tensor Charts' });
+          tfvis.render.heatmap(data, surface);
+
+          // Render to page
+          const container = document.getElementById('heatmap-cont4');
+          tfvis.render.heatmap(data, container, {
+            width: 500,
+            height: 500
+          });
+        }
+      </script>
+
     </section>
 
   </article>
