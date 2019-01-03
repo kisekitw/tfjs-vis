@@ -462,7 +462,7 @@ Renders a heatmap.
   ```ts
   {
     // a matrix of numbers
-    values: number[][]|Tensor2d,
+    values: number[][]|Tensor2D,
     // Human readable labels for each class in the matrix. Optional
     xLabels?: string[]
     yLabels?: string[]
@@ -474,15 +474,17 @@ Renders a heatmap.
     yLabels: ['size', 'temperature'],
   }
   ```
-* @param container An `HTMLElement` or `Surface` in which to draw the chart
-* @param opts optional parameters
-* @param opts.colorMap which colormap to use. One of viridis|blues|greyscale. Defaults to viridis
+* @param container An `HTMLElement` or `Surface` in which to draw the chart.
+* @param opts optional parameters.
+* @param opts.colorMap which colormap to use. One of viridis|blues|greyscale. Defaults to viridis.
 * @param opts.domain a two element array representing a custom output domain
   for the color scale. Useful if you want to plot multiple heatmaps using
   the same scale.
-* @param opts.width width of chart in px
-* @param opts.height height of chart in px
-* @param opts.fontSize fontSize in pixels for text in the chart
+* @param opts.xLabel label for x axis
+* @param opts.yLabel label for y axis
+* @param opts.width width of chart in px.
+* @param opts.height height of chart in px.
+* @param opts.fontSize fontSize in pixels for text in the chart.
 
 
 ## Metrics

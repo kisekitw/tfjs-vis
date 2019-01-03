@@ -396,7 +396,7 @@
             }
             values.push(row);
           }
-          const data = { values: values };
+          const data = { values };
 
           // Render to visor
           const surface = tfvis.visor().surface({ name: 'Confusion Matrix', tab: 'Charts' });
@@ -513,11 +513,11 @@
           for (let i = 0; i < rows; i++) {
             const row = []
             for (let j = 0; j < cols; j++) {
-              row.push(Math.random() * 100);
+              row.push(i * j)
             }
             values.push(row);
           }
-          const data = { values: values };
+          const data = { values };
 
           // Render to visor
           const surface = tfvis.visor().surface({ name: 'Heatmap', tab: 'Charts' });
@@ -581,7 +581,6 @@
         }
       </script>
 
-
       <p>
         Tensor2D's are also supported
       </p>
@@ -597,17 +596,21 @@
 
           // Render to visor
           const surface = tfvis.visor().surface({ name: 'Heatmap', tab: 'Tensor Charts' });
-          tfvis.render.heatmap(data, surface);
+          tfvis.render.heatmap(data, surface, {
+            xLabel: 'Thing',
+            yLabel: 'Property',
+          });
 
           // Render to page
           const container = document.getElementById('heatmap-cont4');
           tfvis.render.heatmap(data, container, {
             width: 500,
-            height: 500
+            height: 500,
+            xLabel: 'Thing',
+            yLabel: 'Property',
           });
         }
       </script>
-
     </section>
 
   </article>

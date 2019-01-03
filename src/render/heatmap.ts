@@ -15,14 +15,13 @@
  * =============================================================================
  */
 
+import {Tensor} from '@tensorflow/tfjs';
 import embed, {Mode, VisualizationSpec} from 'vega-embed';
-type ExtendedLayerSpec = import('vega-lite').spec.ExtendedLayerSpec;
 
-import {Drawable, HeatmapData, VisOptions,} from '../types';
+import {Drawable, HeatmapData, HeatmapOptions} from '../types';
+import {assert} from '../util/utils';
 
 import {getDrawArea} from './render_utils';
-import {Tensor} from '@tensorflow/tfjs';
-import {assert} from '../util/utils';
 
 /**
  * Renders a heatmap.
@@ -31,7 +30,7 @@ import {assert} from '../util/utils';
  *  and a 'labels' property.
  *  {
  *    // a matrix of numbers
- *    values: number[][]|Tensor2d,
+ *    values: number[][]|Tensor2D,
  *
  *    // Human readable labels for each class in the matrix. Optional
  *    xLabels?: string[]
@@ -39,9 +38,9 @@ import {assert} from '../util/utils';
  *  }
  *  e.g.
  *  {
- *    values: [[80, 23], [56, 94]],
+ *    values: [[80, 23, 50], [56, 94, 39]],
  *    xLabels: ['dog', 'cat'],
- *    yLabels: ['size', 'temperature'],
+ *    yLabels: ['size', 'temperature', 'agility'],
  *  }
  * @param container An `HTMLElement` or `Surface` in which to draw the chart
  * @param opts optional parameters
@@ -50,14 +49,15 @@ import {assert} from '../util/utils';
  * @param opts.domain a two element array representing a custom output domain
  *     for the color scale. Useful if you want to plot multiple heatmaps using
  *     the same scale.
+ * @param opts.xLabel label for x axis
+ * @param opts.yLabel label for y axis
  * @param opts.width width of chart in px
  * @param opts.height height of chart in px
  * @param opts.fontSize fontSize in pixels for text in the chart
  */
 export async function renderHeatmap(
     data: HeatmapData, container: Drawable,
-    opts: VisOptions&
-    {colorMap?: ColorMap, domain?: number[]} = {}): Promise<void> {
+    opts: HeatmapOptions = {}): Promise<void> {
   const options = Object.assign({}, defaultOpts, opts);
   const drawArea = getDrawArea(container);
 
@@ -66,18 +66,32 @@ export async function renderHeatmap(
   const values: MatrixEntry[] = [];
   const {xLabels, yLabels} = data;
 
+  // These two branches are very similar but we want to do the test once
+  // rather than on every element access
   if (data.values instanceof Tensor) {
-    // These two branches are very similar but we want to do the test once
-    // rather than on every element access
     assert(
         data.values.rank === 2,
         'Input to renderHeatmap must be a 2d array or Tensor2d');
 
+    const shape = data.values.shape;
+    if (xLabels) {
+      assert(
+          shape[0] === xLabels.length,
+          `Length of xLabels (${xLabels.length}) must match number of rows
+          (${shape[0]})`);
+    }
+
+    if (yLabels) {
+      assert(
+          shape[1] === yLabels.length,
+          `Length of xLabels (${yLabels.length}) must match number of columns
+          (${shape[1]})`);
+    }
+
     // This is a slightly specialized version of TensorBuffer.get, inlining it
-    // avoids the overhead of a function per data element access and is
+    // avoids the overhead of a function call per data element access and is
     // specialized to only deal with the 2d case.
     const inputArray = await data.values.data();
-    const shape = data.values.shape;
     const [numRows, numCols] = shape;
 
     for (let row = 0; row < numRows; row++) {
@@ -86,20 +100,32 @@ export async function renderHeatmap(
         const y = yLabels ? yLabels[col] : col;
 
         const index = (row * numCols) + col;
-        const count = inputArray[index];
+        const value = inputArray[index];
 
-        values.push({x, y, count});
+        values.push({x, y, value});
       }
     }
   } else {
+    if (xLabels) {
+      assert(
+          data.values.length === xLabels.length,
+          `Number of rows (${data.values.length}) must match
+          number of xLabels (${xLabels.length})`);
+    }
+
     const inputArray = data.values as number[][];
     for (let row = 0; row < inputArray.length; row++) {
       const x = xLabels ? xLabels[row] : row;
+      if (yLabels) {
+        assert(
+            data.values[row].length === yLabels.length,
+            `Number of columns in row ${row} (${data.values[row].length})
+            must match length of yLabels (${yLabels.length})`);
+      }
       for (let col = 0; col < inputArray[row].length; col++) {
         const y = yLabels ? yLabels[col] : col;
-        const count = inputArray[row][col];
-
-        values.push({x, y, count});
+        const value = inputArray[row][col];
+        values.push({x, y, value});
       }
     }
   }
@@ -132,31 +158,27 @@ export async function renderHeatmap(
       'scale': {'bandPaddingInner': 0, 'bandPaddingOuter': 0},
     },
     'data': {'values': values},
+    'mark': 'rect',
     'encoding': {
       'x': {
         'field': 'x',
-        'type': 'ordinal',
+        'type': options.xType,
         // Maintain sort order of the axis if labels is passed in
         'scale': {'domain': xLabels},
         'title': options.xLabel,
       },
       'y': {
         'field': 'y',
-        'type': 'ordinal',
+        'type': options.yType,
         // Maintain sort order of the axis if labels is passed in
         'scale': {'domain': yLabels},
         'title': options.yLabel,
       },
-    },
-    'layer': [{
-      'mark': {'type': 'rect'},
-      'encoding': {
-        'fill': {
-          'field': 'count',
-          'type': 'quantitative',
-        },
+      'fill': {
+        'field': 'value',
+        'type': 'quantitative',
       },
-    }]
+    }
   };
 
   let colorRange: string[]|string;
@@ -172,14 +194,15 @@ export async function renderHeatmap(
       colorRange = 'viridis';
       break;
   }
+
   if (colorRange !== 'viridis') {
-    const fill = (spec.layer[0] as ExtendedLayerSpec).encoding!.fill!;
+    const fill = spec.encoding!.fill;
     // @ts-ignore
     fill.scale = {'range': colorRange};
   }
 
   if (options.domain) {
-    const fill = (spec.layer[0] as ExtendedLayerSpec).encoding!.fill!;
+    const fill = spec.encoding!.fill;
     // @ts-ignore
     if (fill.scale != null) {
       // @ts-ignore
@@ -191,14 +214,13 @@ export async function renderHeatmap(
   }
 
   await embed(drawArea, spec, embedOpts);
-  return Promise.resolve();
 }
 
 const defaultOpts = {
   xLabel: null,
   yLabel: null,
-  xType: 'nominal',
-  yType: 'nominal',
+  xType: 'ordinal',
+  yType: 'ordinal',
   colorMap: 'viridis',
   fontSize: 12,
   domain: null,
@@ -207,7 +229,5 @@ const defaultOpts = {
 interface MatrixEntry {
   x: string|number;
   y: string|number;
-  count: number;
+  value: number;
 }
-
-type ColorMap = 'greyscale'|'viridis'|'blues';
